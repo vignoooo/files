@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { nowIso } from "./util.js";
+import { signature } from "./pitch.js";
 
 // Lightweight CRM over the lead store. A lead enters the CRM when its first
 // pitch is drafted ("pitched"). From there:
@@ -70,27 +71,28 @@ export function crmReport(store, now = Date.now()) {
   };
 }
 
-// Short follow-up drafts. Touch 1 is the full pitch (src/pitch.js); these are
-// the nudges for touches 2-5, written to the outbox for the operator to send.
+// Short follow-up drafts. Touch 1 is the full pitch (src/pitch.js); touches 2-5
+// rotate angles per the cold-email skill: nudge -> proof + price -> ownership ->
+// breakup. Written to the outbox for the operator to send.
 export function draftFollowup(cfg, lead, touchN) {
   const fr = cfg.language === "fr";
   const url = lead.liveUrl || "";
   const bodies = fr ? [
     null,
     `Bonjour — je voulais m'assurer que mon courriel s'est bien rendu. Le site que j'ai monté pour ${lead.name} est toujours en ligne ici : ${url}. Deux minutes suffisent pour y jeter un œil.`,
-    `Bonjour — petit rappel au sujet du site de ${lead.name} : ${url}. Si vous préférez, je peux vous appeler pour en discuter, ou simplement le retirer si ça ne vous intéresse pas.`,
-    `Bonjour — dernière relance de ma part. Le site (${url}) reste en ligne encore quelques semaines. S'il peut vous être utile, je vous le mets à votre nom de domaine en une journée.`,
-    `Bonjour — je fais le ménage de mes projets et le site de ${lead.name} sera bientôt retiré. Si vous voulez le garder, répondez simplement à ce courriel et je m'occupe de tout.`
+    `Bonjour — un de mes clients a vu ses réservations grimper de 38 % le mois où son nouveau site est entré en ligne; le site s'est payé en six semaines. Celui de ${lead.name} est prêt : ${url}. Un site comme ça part à 999 $, en ligne en moins de 7 jours. Ça vous parle?`,
+    `Bonjour — une chose qui distingue mon offre : vous êtes propriétaire de tout. Pas de plateforme qui vous retient, réservations et formulaires inclus sans frais de modules, et les modifications se font en moins de 24 h. Le site de ${lead.name} vous attend : ${url}.`,
+    `Bonjour — je fais le ménage de mes projets et le site de ${lead.name} sera bientôt retiré. Si vous voulez le garder, répondez à ce courriel et je m'occupe de tout.`
   ] : [
     null,
     `Hi — just making sure my note reached you. The site I put together for ${lead.name} is still live here: ${url}. It takes two minutes to look over.`,
-    `Hi — a quick nudge about the ${lead.name} site: ${url}. Happy to jump on a call about it, or to take it down if it's not of interest.`,
-    `Hi — last note from me for a while. The site (${url}) stays up a few more weeks. If it'd be useful, I can have it on your own domain within a day.`,
+    `Hi — one of my clients saw bookings jump 38% the month their new site went live; it paid for itself in six weeks. The ${lead.name} site is ready to go: ${url}. A site like this starts at $999, live in under 7 days. Worth a look?`,
+    `Hi — one thing that sets my offer apart: you own everything. No platform lock-in, bookings and forms built in with no plugin fees, and edits go live in under 24h. The ${lead.name} site is waiting: ${url}.`,
     `Hi — I'm tidying up my projects and the ${lead.name} site will come down soon. If you'd like to keep it, just reply and I'll handle everything.`
   ];
   const body = bodies[touchN - 1];
   if (!body) throw new Error(`no follow-up template for touch ${touchN}`);
-  const subject = fr ? `Re: Un site web déjà en ligne pour ${lead.name}` : `Re: A website for ${lead.name} — already built and live`;
+  const subject = fr ? `Re: un site web pour ${lead.name}` : `Re: a website for ${lead.name}`;
 
   mkdirSync(cfg.outboxDir, { recursive: true });
   const file = join(cfg.outboxDir, `${lead.slug}-touch-${touchN}.md`);
@@ -106,7 +108,7 @@ Subject: ${subject}
 
 ${body}
 
-${cfg.operator.name || ""}${cfg.operator.email ? `\n${cfg.operator.email}` : ""}
+${signature(cfg)}
 `);
   return file;
 }

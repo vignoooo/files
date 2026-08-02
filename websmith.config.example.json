@@ -1,12 +1,19 @@
 {
   "region": "Sherbrooke, QC",
-  "categories": ["restaurant", "barber", "bakery", "florist", "auto repair"],
+  "categories": ["auto repair", "restaurant", "barber", "bakery", "florist"],
   "prospector": "overpass",
   "builder": "claude",
   "deployer": "none",
+  "includeOutdated": true,
+  "parallel": 1,
   "maxPhotos": 6,
   "language": "fr",
-  "operator": { "name": "Gabriel", "email": "gabriel@vigno.ca" },
-  "designNotes": "Warm, local, trustworthy. No template energy.",
+  "operator": {
+    "name": "Gabriel",
+    "email": "gabriel@vigno.ca",
+    "company": "VIGNO",
+    "url": "vigno.ca"
+  },
+  "designNotes": "VIGNO Essential package standard: one page, mobile-first, prominent booking CTA, contact form, map link. Custom design per business, never template energy.",
   "daemonIntervalSeconds": 3600
 }

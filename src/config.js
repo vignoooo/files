@@ -23,7 +23,7 @@ const DEFAULTS = {
   // Language for site copy and the pitch ("en", "fr", ...)
   language: "en",
   // Operator identity, used to sign pitch drafts
-  operator: { name: "", email: "" },
+  operator: { name: "", email: "", company: "", url: "" },
   // Extra styling/brand direction passed to the site builder
   designNotes: "",
   // Seconds between pipeline cycles in daemon mode

@@ -51,6 +51,17 @@ Common operator requests and how to handle them:
   outreach-writer agent (which applies cold-email + stop-slop) is part of the job,
   not an extra.
 
+## The operator's business
+
+The operator is Gabriel, running VIGNO (vigno.ca) — custom websites for Québec
+local businesses, priority niche garages/auto shops. The full offer (packages from
+$999, add-ons, mandatory hosting from $29/mo, proof points, differentiators, voice)
+lives in `.agents/product-marketing.md`; the cold-email skill reads it
+automatically. Demo sites represent the Essential package. When a business replies
+interested, the close is: live on your domain in under 7 days, from $999, 50%
+upfront, you own everything, hosting from $29/mo — and suggest the 30-minute
+discovery call. Honour the reply-within-24h promise.
+
 ## Memory
 
 `memory.md` holds preferences the operator has taught you: design tweaks, outreach

@@ -1,6 +1,24 @@
 {
   "version": 1,
   "skills": {
+    "audit": {
+      "source": "AccessLint/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/accesslint/skills/audit/SKILL.md",
+      "computedHash": "967363bdc3d2d46fe2ca1ff14e91dd2525cd41573dc1ceee644d5f91226cd117"
+    },
+    "bencium-controlled-ux-designer": {
+      "source": "bencium/bencium-claude-code-design-skill",
+      "sourceType": "github",
+      "skillPath": "bencium-controlled-ux-designer/skills/bencium-controlled-ux-designer/SKILL.md",
+      "computedHash": "4aacbb29e05d9e45600105fbdcb24b38fa7de40d29db025f05a1b121308afc5c"
+    },
+    "bencium-innovative-ux-designer": {
+      "source": "bencium/bencium-claude-code-design-skill",
+      "sourceType": "github",
+      "skillPath": "bencium-innovative-ux-designer/skills/bencium-innovative-ux-designer/SKILL.md",
+      "computedHash": "a535e501e9f72e0de2d43546104f98b596119f8bbea1df915579b26da08d792d"
+    },
     "brief-to-tasks": {
       "source": "julianoczkowski/designer-skills",
       "sourceType": "github",
@@ -25,11 +43,23 @@
       "skillPath": "design-review/SKILL.md",
       "computedHash": "8d4bbee4f6eb3fc19896064307b8a267c0bddf8dc7800a36a6573e0430815798"
     },
+    "design-system": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/design-system/SKILL.md",
+      "computedHash": "a05715299135276628f53519484e1267ec8ad111e6355a09c2da1cf66aee2cc3"
+    },
     "design-tokens": {
       "source": "julianoczkowski/designer-skills",
       "sourceType": "github",
       "skillPath": "design-tokens/SKILL.md",
       "computedHash": "20df23737f28b34cb3d0d808d16a958c5ff3bddf0dcb8eedd700735ecb5ae8d1"
+    },
+    "diff": {
+      "source": "AccessLint/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/accesslint/skills/diff/SKILL.md",
+      "computedHash": "2668b8fc4c6d6bd930e8592029a7b95cee27c4add41f42e641dc6fa73ba2ef12"
     },
     "frontend-design": {
       "source": "julianoczkowski/designer-skills",
@@ -48,6 +78,48 @@
       "sourceType": "github",
       "skillPath": "information-architecture/SKILL.md",
       "computedHash": "42b3b96103c0c910ff73841b9c843c8be8111c3d1fdc0746c07d911a23335191"
+    },
+    "scan": {
+      "source": "AccessLint/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/accesslint/skills/scan/SKILL.md",
+      "computedHash": "bde5f5cbf2858a40e345275c649e49f52622e3ea4b4b44cfc9577eae75150902"
+    },
+    "ui-styling": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-styling/SKILL.md",
+      "computedHash": "360a6007fae358c852fe0ba5efc0f69deee4768a00b9bdc8cd393a3f8491626a"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "ae6989c5c68a8a0cebbc2504e44f933dddd50d17974f295dc2fa5a80cb3d63ed"
+    },
+    "vercel-composition-patterns": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/composition-patterns/SKILL.md",
+      "computedHash": "f98931159fa9c7fed043bcd18a891a46dcf89ababa38df13a4c5b7b30dc0ce07"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "3219a1944e404ffc14d1d9d6aef6dd2e3855b81387ee0a044ccbfe14d34c2357"
+    },
+    "vercel-react-native-skills": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-native-skills/SKILL.md",
+      "computedHash": "2e9088a7333666d8c2833b8ff58bd51b955501c42b4c7244f72b4cbf22dafcc4"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
     }
   }
 }

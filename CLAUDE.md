@@ -57,14 +57,15 @@ Common operator requests and how to handle them:
 ## VIGNO app integration (vigno.ca)
 
 With `VIGNO_WEBSMITH_KEY` set in `.env`, the pipeline talks to the operator's real
-app: pitched leads insert into the vigno.ca CRM (`leads` table, stage
-`a_contacter`, source `websmith`), touches/replies/wins mirror as stage changes
-(contacte/relance/repondu/client/perdu), and deployed demos register in
-`websmith_demos` so the public link is `https://vigno.ca/d/<token>/` — the app
-reverse-proxies the underlying deploy, keeping the operator's domain on every
-pitch. `websmith retire <slug>` 404s the demo immediately. Deploy still needs a
-real deployer (vercel/netlify) as the upstream; `deployer: "none"` skips demo
-registration.
+app through `public.websmith_ingest`, a secret-guarded database function exposed
+via Supabase REST (no app route involved): pitched leads insert into the vigno.ca
+CRM (`leads` table, stage `a_contacter`, source `websmith`), touches/replies/wins
+mirror as stage changes (contacte/relance/repondu/client/perdu), and deployed
+demos register in `websmith_demos` so the public link is
+`https://vigno.ca/d/<token>/` — the app's `/d/$token` route reverse-proxies the
+underlying deploy, keeping the operator's domain on every pitch. `websmith retire
+<slug>` 404s the demo immediately. Deploy still needs a real deployer
+(vercel/netlify) as the upstream; `deployer: "none"` skips demo registration.
 
 ## The operator's business
 

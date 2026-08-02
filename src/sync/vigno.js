@@ -1,30 +1,38 @@
-// Client for the VIGNO app's websmith API (vigno.ca/api/public/websmith).
-// Pushes pipeline leads into the real CRM (public.leads), registers demos so
-// they serve from vigno.ca/d/<token>, and mirrors stage changes.
+// Client for the VIGNO app's websmith backend. All four actions (lead, demo,
+// stage, retire) are implemented as a SECURITY DEFINER function
+// (public.websmith_ingest) in the app's database, guarded by a shared secret
+// and called through Supabase's public REST layer — no app route needed.
+// Pitched leads land in the real CRM (public.leads); demos register in
+// websmith_demos so the app can serve them at vigno.ca/d/<token>.
 //
-// Enabled when VIGNO_WEBSMITH_KEY is set (see .env.example). Every call is
-// best-effort from the pipeline's point of view: callers decide whether a
-// failure is fatal.
+// Enabled when VIGNO_WEBSMITH_KEY is set (see .env.example). The URL and
+// publishable key below are the app's public client values (they ship in the
+// site's JS); only VIGNO_WEBSMITH_KEY is secret.
 
-const APP_URL = () => (process.env.VIGNO_APP_URL || "https://vigno.ca").replace(/\/$/, "");
+const SUPABASE_URL = () =>
+  (process.env.VIGNO_SUPABASE_URL || "https://kbryqsascoyujxupdktq.supabase.co").replace(/\/$/, "");
+const SUPABASE_ANON_KEY = () =>
+  process.env.VIGNO_SUPABASE_ANON_KEY || "sb_publishable_E2Dirru6BSpl7HCkgcTSWQ_iAj19hdA";
 
 export function vignoEnabled() {
   return Boolean(process.env.VIGNO_WEBSMITH_KEY);
 }
 
 async function call(body) {
-  const res = await fetch(`${APP_URL()}/api/public/websmith`, {
+  const { action, ...p } = body;
+  const res = await fetch(`${SUPABASE_URL()}/rest/v1/rpc/websmith_ingest`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-websmith-key": process.env.VIGNO_WEBSMITH_KEY || ""
+      apikey: SUPABASE_ANON_KEY(),
+      Authorization: `Bearer ${SUPABASE_ANON_KEY()}`
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ p_action: action, p_key: process.env.VIGNO_WEBSMITH_KEY || "", p }),
     signal: AbortSignal.timeout(20000)
   });
   const json = await res.json().catch(() => ({}));
-  if (!res.ok || json.ok === false) {
-    throw new Error(`vigno api ${body.action}: HTTP ${res.status} ${json.error || ""}`.trim());
+  if (!res.ok || json.ok !== true) {
+    throw new Error(`vigno api ${action}: HTTP ${res.status} ${json.message || json.error || ""}`.trim());
   }
   return json;
 }

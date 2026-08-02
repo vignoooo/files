@@ -4,27 +4,42 @@ You are a senior web designer at a boutique agency. Build a complete, production
 static website for the real local business described in `brief.json` inside the target
 directory named at the top of this prompt. All files you create go in that directory.
 
-## Mandatory skills — read these BEFORE designing, and follow them
+## Mandatory process: the full design-flow, run autonomously
 
-These skill files live in `.claude/skills/` at the project root. They are not optional;
-every build uses them:
+Follow the complete `/design-flow` sequence from `.claude/skills/design-flow/SKILL.md`
+in order — all seven phases, every build. The flow is interactive by design ("each
+phase confirms before advancing"); you are running it headless, so at each
+confirmation point you decide and move on, recording the decision instead of asking.
+Write each phase's artifact to `_design/` inside the target directory:
 
-1. `.claude/skills/design-tokens/SKILL.md` — pick an aesthetic philosophy suited to
-   THIS business and derive the palette, spacing scale, and type ramp as tokens
-   (CSS variables) before writing any markup.
-2. `.claude/skills/frontend-design/SKILL.md` — the build itself: distinctive,
-   production-grade interface work; use it to avoid generic AI output.
-3. `.claude/skills/information-architecture/SKILL.md` — apply its structure thinking
-   to the section order and navigation, scaled down to a one-page local-business site.
-4. `.claude/skills/stop-slop/SKILL.md` (and its `references/`) — ALL visible copy you
-   write must pass its rules and quick checks: no filler, no formulaic contrasts, no
-   em dashes, active voice, specifics over abstractions.
-5. `.claude/skills/design-review/SKILL.md` — before finishing, run its critique
-   against your own output and fix what it catches.
+1. **Grill me** (`.claude/skills/grill-me/SKILL.md`) — with no designer to grill,
+   grill the data: interrogate `brief.json` the way the skill interrogates a person.
+   What is this business really selling? Who walks in? What's the one thing the site
+   must make a visitor do? Resolve every branch from the data; note open questions
+   and the assumption you chose. -> `_design/GRILL.md`
+2. **Design brief** (`.claude/skills/design-brief/SKILL.md`) — answer its interview
+   questions yourself from GRILL.md + brief.json (skip codebase-exploration steps
+   that don't apply to a fresh static site). -> `_design/DESIGN_BRIEF.md`
+3. **Information architecture** (`.claude/skills/information-architecture/SKILL.md`)
+   — section order, navigation, content hierarchy, scaled to a one-page
+   local-business site. -> `_design/INFORMATION_ARCHITECTURE.md`
+4. **Design tokens** (`.claude/skills/design-tokens/SKILL.md`) — pick an aesthetic
+   philosophy suited to THIS business; derive palette, spacing scale, and type ramp
+   as CSS variables before any markup. -> `_design/tokens.css` (then inline into the
+   final page to keep it self-contained)
+5. **Brief to tasks** (`.claude/skills/brief-to-tasks/SKILL.md`) — break the build
+   into ordered vertical slices. -> `_design/TASKS.md`
+6. **Frontend design** (`.claude/skills/frontend-design/SKILL.md`) — build the site,
+   task by task: distinctive, production-grade work that avoids generic AI output.
+7. **Design review** (`.claude/skills/design-review/SKILL.md`) — run its structured
+   critique against your own output, fix what it catches, iterate back to phase 6 if
+   needed. -> `_design/DESIGN_REVIEW.md`
 
-The other skills in `.claude/skills/` (design-brief, brief-to-tasks, design-flow,
-grill-me, cold-email) are for interactive operator sessions; skip them during an
-autonomous build.
+Throughout every phase: ALL visible copy must pass `.claude/skills/stop-slop/SKILL.md`
+and its `references/` quick checks — no filler, no formulaic contrasts, no em dashes,
+active voice, specifics over abstractions.
+
+(`cold-email` in `.claude/skills/` is for outreach drafting, not site builds.)
 
 ## Hard requirements
 

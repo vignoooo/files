@@ -1,5 +1,21 @@
 import { spawn } from "node:child_process";
+import { cpSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, basename } from "node:path";
 import { log } from "../util.js";
+
+// Working files that must never reach the live site.
+const PRIVATE = new Set(["_design", "qa", "qa-report.json", "brief.json"]);
+
+// Stages a clean copy of the site for upload, leaving working files behind.
+export function stageForUpload(siteDir) {
+  const stage = mkdtempSync(join(tmpdir(), "websmith-deploy-"));
+  cpSync(siteDir, stage, {
+    recursive: true,
+    filter: (src) => !PRIVATE.has(basename(src))
+  });
+  return stage;
+}
 
 // Deploys siteDir and returns the live URL (or a local path for "none").
 export async function deploySite(cfg, lead, siteDir) {
@@ -17,14 +33,14 @@ export async function deploySite(cfg, lead, siteDir) {
 }
 
 async function deployVercel(lead, siteDir) {
-  const out = await run("vercel", ["deploy", "--prod", "--yes", "--name", `site-${lead.slug}`], siteDir);
+  const out = await run("vercel", ["deploy", "--prod", "--yes", "--name", `site-${lead.slug}`], stageForUpload(siteDir));
   const url = out.split(/\s+/).reverse().find((w) => w.startsWith("https://"));
   if (!url) throw new Error("vercel finished but printed no deployment URL");
   return url;
 }
 
 async function deployNetlify(lead, siteDir) {
-  const out = await run("netlify", ["deploy", "--prod", "--dir", ".", "--json"], siteDir);
+  const out = await run("netlify", ["deploy", "--prod", "--dir", ".", "--json"], stageForUpload(siteDir));
   const json = JSON.parse(out.slice(out.indexOf("{")));
   const url = json.deploy_url || json.url;
   if (!url) throw new Error("netlify finished but returned no deployment URL");

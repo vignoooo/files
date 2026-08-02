@@ -34,13 +34,16 @@ Common operator requests and how to handle them:
 
 `.claude/skills/` is vendored into this project and its use is NOT optional:
 
-- **Every site build** follows the designer skills (Apache-2.0, from
-  julianoczkowski/designer-skills): `design-tokens` (aesthetic + token system
-  first), `frontend-design` (the build), `information-architecture` (structure),
-  `design-review` (self-critique before finishing). The build brief
-  (`prompts/site-brief.md`) already mandates them for headless builds; hold
-  interactive builds to the same bar, and use `design-brief`, `brief-to-tasks`,
-  `design-flow`, and `grill-me` when working with the operator on custom design work.
+- **Every site build** runs the full `/design-flow` sequence from the designer
+  skills (Apache-2.0, julianoczkowski/designer-skills), all seven phases in order:
+  grill-me -> design-brief -> information-architecture -> design-tokens ->
+  brief-to-tasks -> frontend-design -> design-review, with iterate loops back into
+  the build. Headless builds run it autonomously (phase artifacts land in
+  `sites/<slug>/_design/`; grilling interrogates brief.json instead of a person) —
+  `prompts/site-brief.md` spells this out. Interactive builds run the same flow
+  with the operator answering the grilling and confirming each phase. `_design/`,
+  `qa/`, `qa-report.json`, and `brief.json` are working files; deploy staging
+  excludes them from the live site automatically.
 - **All visible copy anywhere** — site copy, pitches, follow-ups — must pass
   `stop-slop` (its quick checks are the bar).
 - **All outreach drafting** follows `cold-email` (voice, structure, subject lines,

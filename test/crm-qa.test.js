@@ -7,6 +7,8 @@ import { Store } from "../src/store.js";
 import { scoreLead, rankLeads } from "../src/score.js";
 import { recordTouch, recordReply, nextTouchDue, isLapsed, crmReport, draftFollowup, TOUCH_OFFSETS_DAYS } from "../src/crm.js";
 import { runQa } from "../src/qa.js";
+import { stageForUpload } from "../src/deploy/index.js";
+import { existsSync } from "node:fs";
 
 const DAY = 86400000;
 
@@ -98,4 +100,24 @@ test("QA catches broken sites and passes good ones", async () => {
 <body>${"x".repeat(500)}Test Biz<img src="assets/missing.jpg" alt="x"></body></html>`);
   const brokenReport = await runQa(cfg, lead, broken);
   assert.ok(brokenReport.issues.some((i) => /broken local reference/.test(i)));
+});
+
+test("deploy staging strips design artifacts and working files", () => {
+  const site = mkdtempSync(join(tmpdir(), "ws-stage-"));
+  writeFileSync(join(site, "index.html"), "<html>x</html>");
+  writeFileSync(join(site, "brief.json"), "{}");
+  writeFileSync(join(site, "qa-report.json"), "{}");
+  mkdirSync(join(site, "_design"));
+  writeFileSync(join(site, "_design", "DESIGN_BRIEF.md"), "x");
+  mkdirSync(join(site, "qa"));
+  writeFileSync(join(site, "qa", "desktop.png"), "x");
+  mkdirSync(join(site, "assets"));
+  writeFileSync(join(site, "assets", "p.jpg"), "x");
+
+  const stage = stageForUpload(site);
+  assert.ok(existsSync(join(stage, "index.html")));
+  assert.ok(existsSync(join(stage, "assets", "p.jpg")));
+  for (const gone of ["_design", "qa", "qa-report.json", "brief.json"]) {
+    assert.equal(existsSync(join(stage, gone)), false, `${gone} should be excluded`);
+  }
 });

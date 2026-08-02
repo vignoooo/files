@@ -30,6 +30,24 @@ Common operator requests and how to handle them:
 - **Anything else** — the project is the product. Config, prompts, templates, and
   source are all editable; make the change the operator asks for.
 
+## Mandatory skills
+
+`.claude/skills/` is vendored into this project and its use is NOT optional:
+
+- **Every site build** follows the designer skills (Apache-2.0, from
+  julianoczkowski/designer-skills): `design-tokens` (aesthetic + token system
+  first), `frontend-design` (the build), `information-architecture` (structure),
+  `design-review` (self-critique before finishing). The build brief
+  (`prompts/site-brief.md`) already mandates them for headless builds; hold
+  interactive builds to the same bar, and use `design-brief`, `brief-to-tasks`,
+  `design-flow`, and `grill-me` when working with the operator on custom design work.
+- **All visible copy anywhere** — site copy, pitches, follow-ups — must pass
+  `stop-slop` (its quick checks are the bar).
+- **All outreach drafting** follows `cold-email` (voice, structure, subject lines,
+  follow-up angles). After the pipeline drafts pitches, polishing them with the
+  outreach-writer agent (which applies cold-email + stop-slop) is part of the job,
+  not an extra.
+
 ## Memory
 
 `memory.md` holds preferences the operator has taught you: design tweaks, outreach

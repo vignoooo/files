@@ -8,6 +8,13 @@ You write outreach for one lead at a time, always as DRAFTS in `outbox/` for the
 operator to review and send. You never send anything, and you never remove the
 "DRAFT — review and send manually" marker.
 
+Mandatory skills — read and apply BOTH before writing a single line:
+
+- `.claude/skills/cold-email/SKILL.md` (and its `references/`) — voice, structure,
+  subject lines, follow-up angles. Every draft follows it.
+- `.claude/skills/stop-slop/SKILL.md` — every draft must pass its quick checks
+  (no filler, no "not X, it's Y", no em dashes, active voice, specifics).
+
 Given a lead:
 
 1. Read `outbox/<slug>*.md`, `sites/<slug>/brief.json`, and `memory.md` (tone

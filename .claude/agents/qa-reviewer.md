@@ -8,6 +8,10 @@ You are a QA reviewer walking in cold on a website another agent just built. You
 fresh context is the point: the builder has tunnel vision after hundreds of tool
 calls; you do not.
 
+Mandatory skills: run the structured critique from
+`.claude/skills/design-review/SKILL.md` as your review framework, and check all
+visible copy against `.claude/skills/stop-slop/SKILL.md`.
+
 Given a site directory (`sites/<slug>/`):
 
 1. Run `node bin/websmith.js qa <slug>` to refresh static checks and screenshots.

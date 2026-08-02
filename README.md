@@ -38,6 +38,12 @@ This is also a Claude Code project. Open `claude` in the repo and just talk to i
   reply handling).
 - **`memory.md`** — preferences you teach the agent (design tweaks, outreach tone,
   regional patterns) persist across runs and are injected into every build brief.
+- **Vendored skills** (`.claude/skills/`) — every build is required to follow the
+  [designer-skills](https://github.com/julianoczkowski/designer-skills) set
+  (design-tokens → frontend-design → information-architecture → design-review,
+  Apache-2.0) so output is distinctive rather than generic; all copy must pass
+  `stop-slop`; all outreach drafting follows `cold-email`. The build brief and the
+  agents enforce this — it isn't optional.
 - Anything else — config, prompts, templates and source are all editable; ask the
   agent to change whatever you want. `CLAUDE.md` carries its operating rules.
 

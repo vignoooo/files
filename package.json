@@ -1,0 +1,17 @@
+{
+  "name": "websmith",
+  "version": "0.1.0",
+  "description": "Autonomous website agency pipeline: finds local businesses without websites, builds each a bespoke site with Claude Code, deploys it, and drafts a personalised pitch.",
+  "type": "module",
+  "bin": {
+    "websmith": "./bin/websmith.js"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "start": "node bin/websmith.js run",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}

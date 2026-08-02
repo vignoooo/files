@@ -1,0 +1,12 @@
+{
+  "region": "Sherbrooke, QC",
+  "categories": ["restaurant", "barber", "bakery", "florist", "auto repair"],
+  "prospector": "overpass",
+  "builder": "claude",
+  "deployer": "none",
+  "maxPhotos": 6,
+  "language": "fr",
+  "operator": { "name": "Gabriel", "email": "gabriel@vigno.ca" },
+  "designNotes": "Warm, local, trustworthy. No template energy.",
+  "daemonIntervalSeconds": 3600
+}

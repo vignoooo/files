@@ -1,0 +1,8 @@
+node_modules/
+data/
+sites/
+outbox/
+websmith.config.json
+.env
+.vercel
+.netlify

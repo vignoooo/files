@@ -1,6 +1,6 @@
 {
   "region": "Sherbrooke, QC",
-  "categories": ["auto repair", "restaurant", "barber", "bakery", "florist"],
+  "categories": ["auto repair", "construction", "landscaping", "salon", "restaurant"],
   "prospector": "overpass",
   "builder": "claude",
   "deployer": "none",
@@ -10,7 +10,7 @@
   "language": "fr",
   "operator": {
     "name": "Gabriel",
-    "email": "gabriel@vigno.ca",
+    "email": "info@vigno.ca",
     "company": "VIGNO",
     "url": "vigno.ca"
   },

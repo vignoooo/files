@@ -16,7 +16,10 @@ const CATEGORY_TAGS = {
   "auto repair": '["shop"="car_repair"]',
   butcher: '["shop"="butcher"]',
   bar: '["amenity"="bar"]',
-  gym: '["leisure"="fitness_centre"]'
+  gym: '["leisure"="fitness_centre"]',
+  salon: '["shop"="beauty"]',
+  landscaping: '["craft"="gardener"]',
+  construction: '["craft"="builder"]'
 };
 
 // Free prospector: OpenStreetMap businesses in the region with no website/contact tag.

@@ -5,8 +5,48 @@ The `cold-email` skill reads this file before drafting. Keep it in sync with vig
 ## What VIGNO sells
 
 Custom websites for local businesses in Québec, built fast, owned outright by the
-client. Bilingual (EN/FR). Priority niche: garages and auto shops (dedicated
-industry page, vehicle gallery/showroom add-on).
+client. Bilingual (EN/FR). Public contact: info@vigno.ca. Quote requests get a
+personal follow-up within 24-48h; discovery calls book through Calendly.
+
+Full service line (websites are the wedge, not the ceiling): Web Design ·
+E-commerce · Web & Mobile Apps · CRM Systems · AI Agents · AI Content ·
+Branding & Design.
+
+## Proof badges (site-wide trust strip)
+
+★★★★★ 4.9 / 5 · 40+ SMBs (FR: "4,9 / 5 · 40+ PME au Québec") · Live in less than
+7 days · Bilingual FR / EN.
+
+## Industry verticals (dedicated pages at vigno.ca/industry/<type>)
+
+Each vertical has its own headline, angle, and add-on naming. Use these angles in
+outreach to matching businesses:
+
+- **Garages** — "The website your garage deserves. While you're under the hood,
+  your site books the appointments and answers your clients." Angles: bookings
+  24/7, fewer phone calls, Google reviews front and center, found locally.
+  Add-ons renamed: appointment booking system, vehicle gallery/showroom.
+- **Construction** — "While you're on site, your website is answering leads and
+  winning bids." Angles: qualified leads, structured intake forms cut
+  back-and-forth in half, project galleries as proof. Add-ons: project intake
+  CRM, drone site video.
+- **Landscaping** — angles: estimates captured 24/7, 12-month season coverage.
+  Add-ons: online booking, drone progress video.
+- **Salons** — angles: client self-service 24/7, before/after galleries.
+  Add-ons: online booking, before/after gallery styling.
+- **Restaurants** — angles: 0% third-party commission (vs delivery platforms),
+  live menu updates. Add-ons: online reservations, menu design & PDF, online
+  ordering.
+
+Shared vertical metrics: 100% mobile-optimized · fixed scope & price · under 7
+days from brief to live.
+
+## Brand system (for anything that carries VIGNO's own brand)
+
+Orange #FF3C00, ink #0A0A0A, off-white #FAFAF8. Type: Geist + Geist Mono.
+Editorial-minimal: uppercase mono micro-labels, numbered sections ("02 / PACKAGES"),
+generous whitespace. Client demo sites use the CLIENT's brand, never VIGNO's —
+VIGNO appears only in the preview footer and the signature.
 
 ## Packages
 

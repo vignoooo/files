@@ -121,3 +121,16 @@ test("deploy staging strips design artifacts and working files", () => {
     assert.equal(existsSync(join(stage, gone)), false, `${gone} should be excluded`);
   }
 });
+
+test("pitch uses the matching VIGNO vertical angle", async () => {
+  const { draftPitch } = await import("../src/pitch.js");
+  const outboxDir = mkdtempSync(join(tmpdir(), "ws-angle-"));
+  const cfg = { language: "fr", outboxDir, operator: { name: "G", email: "", company: "VIGNO", url: "vigno.ca" } };
+  draftPitch(cfg, makeLead({ slug: "g1", name: "Garage X", category: "auto repair" }), "https://x");
+  const { readFileSync } = await import("node:fs");
+  const garage = readFileSync(join(outboxDir, "g1.md"), "utf8");
+  assert.match(garage, /sous le capot/);
+  draftPitch(cfg, makeLead({ slug: "r1", name: "Resto Y", category: "restaurant" }), "https://x");
+  const resto = readFileSync(join(outboxDir, "r1.md"), "utf8");
+  assert.match(resto, /commission de plateforme/);
+});

@@ -11,14 +11,57 @@ import { nowIso } from "./util.js";
 // real detail up top, one low-friction ask, no pricing in touch 1.
 const FR_CATEGORIES = {
   "auto repair": "garages", restaurant: "restaurants", bakery: "boulangeries",
-  barber: "salons de coiffure", florist: "fleuristes", cafe: "cafés",
-  plumber: "plombiers", butcher: "boucheries", bar: "bars", gym: "gyms"
+  barber: "salons de coiffure", salon: "salons", florist: "fleuristes",
+  cafe: "cafés", plumber: "plombiers", butcher: "boucheries", bar: "bars",
+  gym: "gyms", landscaping: "entreprises de paysagement",
+  construction: "entrepreneurs en construction"
 };
+
+// One value line per vertical, lifted from the VIGNO industry pages
+// (vigno.ca/industry/<type>). Falls back to the generic booking angle.
+const ANGLES = {
+  "auto repair": {
+    fr: "Pendant que vous êtes sous le capot, un site prend les rendez-vous et répond aux clients.",
+    en: "While you're under the hood, a site books the appointments and answers your clients."
+  },
+  restaurant: {
+    fr: "Un site à vous : menu toujours à jour, réservations directes, zéro commission de plateforme.",
+    en: "A site of your own: live menu, direct reservations, zero third-party commission."
+  },
+  construction: {
+    fr: "Pendant que vous êtes sur le chantier, un site répond aux soumissions et gagne des mandats.",
+    en: "While you're on site, a website answers leads and wins bids."
+  },
+  landscaping: {
+    fr: "Les estimations rentrent 24/7, même en pleine saison.",
+    en: "Estimates come in 24/7, even at the peak of the season."
+  },
+  barber: {
+    fr: "Vos clients réservent en ligne, le jour comme le soir.",
+    en: "Your clients book online, day or night."
+  }
+};
+ANGLES.salon = ANGLES.barber;
+ANGLES.bakery = ANGLES.cafe = ANGLES.bar = {
+  fr: "On vous trouve sur Google, vos heures et votre menu toujours à jour.",
+  en: "People find you on Google, with your hours and menu always current."
+};
+
+function baseCategory(category) {
+  return category.replace(/\s*\(.*\)$/, "").toLowerCase();
+}
 
 function localizeCategory(category, fr) {
   if (!fr) return `${category} businesses`;
-  const base = category.replace(/\s*\(.*\)$/, "").toLowerCase();
-  return FR_CATEGORIES[base] || `commerces (${category})`;
+  return FR_CATEGORIES[baseCategory(category)] || `commerces (${category})`;
+}
+
+function angleFor(category, fr) {
+  const angle = ANGLES[baseCategory(category)];
+  if (angle) return angle[fr ? "fr" : "en"];
+  return fr
+    ? "Un site prend les demandes et les rendez-vous, même quand vous êtes occupé."
+    : "A site takes requests and bookings, even while you're busy.";
 }
 
 export function draftPitch(cfg, lead, liveUrl) {
@@ -31,7 +74,7 @@ export function draftPitch(cfg, lead, liveUrl) {
 
   const body = fr ? `Bonjour,
 
-Je cherchais des ${localizeCategory(lead.category, true)} dans la région et ${lead.name} n'a pas de site web — pourtant ${hook} méritent d'être trouvés en ligne.
+Je cherchais des ${localizeCategory(lead.category, true)} dans la région et ${lead.name} n'a pas de site web — pourtant ${hook} méritent d'être trouvés en ligne. ${angleFor(lead.category, true)}
 
 Alors j'en ai monté un. Il est en ligne ici :
 
@@ -43,7 +86,7 @@ C'est un aperçu, préparé à partir d'informations publiques. Si ça vous pla�
 
 ${signature(cfg)}` : `Hi,
 
-I was looking up ${localizeCategory(lead.category, false)} in the area and ${lead.name} has no website — even though ${hook} deserve to be found online.
+I was looking up ${localizeCategory(lead.category, false)} in the area and ${lead.name} has no website — even though ${hook} deserve to be found online. ${angleFor(lead.category, false)}
 
 So I built one. It's live here:
 

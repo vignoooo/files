@@ -28,7 +28,14 @@ Full offer details: `.agents/product-marketing.md`.
 
 - Home market: Québec. CASL applies to every commercial email; prefer phone or
   walk-in for first contact where practical. Invoices mention GST/QST.
-- Priority niche: garages / auto shops (vehicle gallery add-on exists for them).
+- VIGNO has five industry verticals with dedicated pages and demo sites:
+  garages, construction, landscaping, salons, restaurants. Pitch with the
+  vertical's own angle (see .agents/product-marketing.md): garages = bookings
+  while you're under the hood; construction = leads answered from the site;
+  landscaping = estimates 24/7 in season; salons = self-serve booking day or
+  night; restaurants = zero third-party commission, live menu.
+- Public trust points: 4.9/5 across 40+ Québec SMBs, live in under 7 days,
+  bilingual FR/EN.
 
 ## Pricing
 

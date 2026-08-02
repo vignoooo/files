@@ -9,6 +9,7 @@ import { loadConfig, DEFAULTS } from "../src/config.js";
 import { runCycle, runDaemon, statusReport, Store } from "../src/pipeline.js";
 import { runQa } from "../src/qa.js";
 import { recordTouch, recordReply, markWon, crmReport, nextTouchDue, TOUCH_OFFSETS_DAYS } from "../src/crm.js";
+import { vignoEnabled, pushStage, retireDemo } from "../src/sync/vigno.js";
 import { writeJson, log } from "../src/util.js";
 
 const execFileP = promisify(execFile);
@@ -24,6 +25,7 @@ Pipeline:
   websmith qa <slug>            Re-run QA checks + screenshots on a built site
   websmith preview <slug>       Serve a built site on http://localhost:8787
   websmith retry <slug>         Reset a failed lead to its last good stage
+  websmith retire <slug>        Take a demo offline (owner asked, or cleanup)
   websmith doctor               Check the machine: node, chromium, builder CLI, config, keys
 
 CRM (after a pitch is drafted):
@@ -90,6 +92,7 @@ async function main() {
       const n = recordTouch(s, lead, rest[1] || "email");
       const next = nextTouchDue(lead);
       log(`${lead.name}: touch ${n}/${TOUCH_OFFSETS_DAYS.length} recorded${next ? `, next due ${next.toISOString().slice(0, 10)}` : " — sequence complete"}`);
+      await syncStage(lead);
       break;
     }
     case "reply": {
@@ -98,6 +101,7 @@ async function main() {
       if (!lead) throw new Error(`No lead "${rest[0]}".`);
       const status = recordReply(s, lead, rest[1]);
       log(`${lead.name}: reply recorded -> ${status}`);
+      await syncStage(lead);
       break;
     }
     case "won": {
@@ -106,6 +110,20 @@ async function main() {
       if (!lead) throw new Error(`No lead "${rest[0]}".`);
       markWon(s, lead);
       log(`${lead.name}: WON. Nice.`);
+      await syncStage(lead);
+      break;
+    }
+    case "retire": {
+      const s = store();
+      const lead = s.get(rest[0] || "");
+      if (!lead) throw new Error(`No lead "${rest[0]}".`);
+      if (vignoEnabled() && lead.demoToken) {
+        await retireDemo(lead.slug);
+        log(`${lead.name}: demo taken offline (vigno.ca/d/... now 404s)`);
+      } else {
+        log(`${lead.name}: no published demo to retire — marking lead closed locally`);
+      }
+      s.advance(lead, "skipped", { retiredAt: new Date().toISOString() });
       break;
     }
     case "preview": {
@@ -140,6 +158,17 @@ function requireRegion(cfg) {
   if (!cfg.region) throw new Error('No region configured. Run "websmith init" and set "region".');
 }
 
+// Mirror a CRM stage change to the vigno.ca dashboard, best-effort.
+async function syncStage(lead) {
+  if (!vignoEnabled() || !lead.vignoLeadId) return;
+  try {
+    const stage = await pushStage(lead);
+    if (stage) log(`crm: vigno.ca stage -> ${stage}`);
+  } catch (err) {
+    log(`crm: vigno stage sync failed — ${err.message}`);
+  }
+}
+
 async function doctor(cfg) {
   const checks = [];
   const ok = (name, pass, note = "") => checks.push({ name, pass, note });
@@ -160,6 +189,8 @@ async function doctor(cfg) {
 
   if (cfg.deployer !== "none") ok(`${cfg.deployer} CLI on PATH`, await onPath(cfg.deployer), "install + log in");
   else ok("deployer: none (local preview)", true);
+
+  ok(vignoEnabled() ? "vigno.ca sync: ON (leads + demos publish to your CRM/domain)" : "vigno.ca sync: off (set VIGNO_WEBSMITH_KEY in .env to enable)", true);
 
   const chromes = [cfg.chromePath, process.env.CHROME_PATH, "/opt/pw-browsers/chromium", "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/google-chrome"].filter(Boolean);
   ok("chromium for QA screenshots", chromes.some((p) => existsSync(p)) || await onPath("chromium") || await onPath("google-chrome"), "optional — static QA still runs");

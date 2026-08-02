@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { downloadGooglePhoto } from "./prospect/google.js";
+import { gatherWebPhotoUrls, downloadPhotos } from "./enrich/photos.js";
 import { writeJson, log } from "./util.js";
 
 // Prepares the per-lead workspace: sites/<slug>/ with brief.json and assets/.
@@ -10,6 +11,8 @@ export async function enrich(cfg, lead) {
   const assetsDir = join(siteDir, "assets");
   mkdirSync(assetsDir, { recursive: true });
 
+  // Photo sources, in order of quality: Google Places, then the business's
+  // existing website, then the public og:image of linked Instagram/Facebook.
   const photos = [];
   if (lead.source === "google" && lead.photoRefs.length && cfg.googleApiKey) {
     for (const ref of lead.photoRefs.slice(0, cfg.maxPhotos)) {
@@ -24,6 +27,20 @@ export async function enrich(cfg, lead) {
     }
   }
 
+  let socials = { instagram: null, facebook: null };
+  if (photos.length < cfg.maxPhotos) {
+    const gathered = await gatherWebPhotoUrls(lead, cfg.maxPhotos - photos.length);
+    socials = gathered.socials;
+    if (gathered.urls.length) {
+      const extra = await downloadPhotos(gathered.urls, assetsDir, {
+        startIndex: photos.length,
+        max: cfg.maxPhotos - photos.length
+      });
+      photos.push(...extra);
+      if (extra.length) log(`enrich: ${extra.length} photo(s) from website/socials for ${lead.name}`);
+    }
+  }
+
   const brief = {
     business: {
       name: lead.name,
@@ -35,7 +52,8 @@ export async function enrich(cfg, lead) {
       ratingCount: lead.ratingCount,
       reviews: lead.reviews,
       mapsUrl: lead.mapsUrl,
-      existingSite: lead.existingSite || null
+      existingSite: lead.existingSite || null,
+      socials
     },
     photos,
     language: cfg.language,

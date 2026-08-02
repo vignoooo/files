@@ -87,6 +87,27 @@ Follow-up nudge drafts appear in `outbox/` automatically when a touch comes due.
 | `operator` | `{ name, email }` | Signs the pitch drafts. |
 | `designNotes` | free text | Extra art direction for the builder. |
 
+## VIGNO app integration
+
+Set `VIGNO_WEBSMITH_KEY` in `.env` (see `.env.example`) and the pipeline plugs
+into vigno.ca:
+
+- **CRM** — every pitched lead inserts into the app's `leads` table (stage
+  `a_contacter`, source `websmith`, demo URL in the notes). `touch`, `reply`,
+  and `won` mirror to the dashboard stages (contacte → relance → repondu →
+  client/perdu).
+- **Demos on your domain** — deployed sites register in `websmith_demos` and the
+  pitch links `https://vigno.ca/d/<token>/`; the app reverse-proxies the
+  underlying Vercel/Netlify deploy so your domain fronts every demo.
+- **Take-downs** — `websmith retire <slug>` 404s the demo immediately.
+- **Replies** — `/check-replies` (agent command, Gmail info@vigno.ca) classifies
+  responses, updates both CRMs, and drafts replies for you to send.
+  `/deliverability` verifies SPF/DKIM/DMARC with a real round-trip.
+
+Photos now come from up to three public sources per lead: Google Places, the
+business's existing website, and the public og:image of Instagram/Facebook pages
+linked from it.
+
 ## QA: it checks its own work
 
 After every build, `src/qa.js` runs static checks (self-containment, broken local

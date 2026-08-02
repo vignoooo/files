@@ -27,6 +27,9 @@ Common operator requests and how to handle them:
 - **QA a specific site** — `node bin/websmith.js qa <slug>`, then launch the
   qa-reviewer agent on the screenshots in `sites/<slug>/qa/`.
 - **Add-ons** — `/add-cms`, `/add-bookings`, `/add-seo` extend a built site.
+- **"Check replies"** — `/check-replies` (Gmail, info@vigno.ca): classify replies,
+  update the CRM, draft responses. Take-downs are same-day: `... retire <slug>`.
+- **"Is my email landing?"** — `/deliverability`.
 - **Anything else** — the project is the product. Config, prompts, templates, and
   source are all editable; make the change the operator asks for.
 
@@ -50,6 +53,18 @@ Common operator requests and how to handle them:
   follow-up angles). After the pipeline drafts pitches, polishing them with the
   outreach-writer agent (which applies cold-email + stop-slop) is part of the job,
   not an extra.
+
+## VIGNO app integration (vigno.ca)
+
+With `VIGNO_WEBSMITH_KEY` set in `.env`, the pipeline talks to the operator's real
+app: pitched leads insert into the vigno.ca CRM (`leads` table, stage
+`a_contacter`, source `websmith`), touches/replies/wins mirror as stage changes
+(contacte/relance/repondu/client/perdu), and deployed demos register in
+`websmith_demos` so the public link is `https://vigno.ca/d/<token>/` — the app
+reverse-proxies the underlying deploy, keeping the operator's domain on every
+pitch. `websmith retire <slug>` 404s the demo immediately. Deploy still needs a
+real deployer (vercel/netlify) as the upstream; `deployer: "none"` skips demo
+registration.
 
 ## The operator's business
 

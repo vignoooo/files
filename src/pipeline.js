@@ -9,6 +9,7 @@ import { runQa } from "./qa.js";
 import { deploySite } from "./deploy/index.js";
 import { draftPitch } from "./pitch.js";
 import { crmReport, draftFollowup } from "./crm.js";
+import { vignoEnabled, registerDemo, pushLead } from "./sync/vigno.js";
 import { log, sleep } from "./util.js";
 
 // One full cycle: top up leads, then march every stage forward.
@@ -60,16 +61,34 @@ export async function runCycle(cfg, { prospectLimit = 3 } = {}) {
   });
 
   await stage(store, "qa", n, async (lead) => {
-    const url = await deploySite(cfg, lead, lead.siteDir);
+    let url = await deploySite(cfg, lead, lead.siteDir);
+    const patch = { liveUrl: url };
+    // With vigno sync on, the public link becomes vigno.ca/d/<token> and the
+    // underlying deploy URL stays hidden behind the proxy.
+    if (vignoEnabled() && !url.startsWith("file:")) {
+      const demo = await registerDemo(lead, url);
+      patch.upstreamUrl = url;
+      patch.demoToken = demo.token;
+      patch.liveUrl = url = demo.url;
+    }
     log(`deploy: ${lead.name} -> ${url}`);
-    store.advance(lead, "deployed", { liveUrl: url });
+    store.advance(lead, "deployed", patch);
   });
 
   await stage(store, "deployed", n, async (lead) => {
     const { file, subject } = draftPitch(cfg, lead, lead.liveUrl);
     log(`pitch: ${lead.name} — draft ready: ${file}`);
     log(`pitch:   subject: ${subject}`);
-    store.advance(lead, "pitched", { pitchFile: file });
+    const patch = { pitchFile: file };
+    if (vignoEnabled()) {
+      try {
+        patch.vignoLeadId = await pushLead(lead, lead.liveUrl);
+        log(`crm: ${lead.name} -> vigno.ca CRM (lead ${patch.vignoLeadId})`);
+      } catch (err) {
+        log(`crm: vigno sync failed for ${lead.name} — ${err.message} (lead kept locally)`);
+      }
+    }
+    store.advance(lead, "pitched", patch);
   });
 
   // 3. CRM housekeeping: surface due follow-ups and draft the nudges.

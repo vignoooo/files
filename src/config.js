@@ -1,5 +1,19 @@
 import { resolve } from "node:path";
+import { readFileSync, existsSync } from "node:fs";
 import { readJson } from "./util.js";
+
+// Minimal .env loader (zero-dep): KEY=value lines, # comments, no expansion.
+// Existing environment variables always win.
+export function loadEnv(root = process.cwd()) {
+  const path = resolve(root, ".env");
+  if (!existsSync(path)) return;
+  for (const line of readFileSync(path, "utf8").split("\n")) {
+    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+    if (!m || line.trim().startsWith("#")) continue;
+    const value = m[2].replace(/^["']|["']$/g, "");
+    if (!(m[1] in process.env)) process.env[m[1]] = value;
+  }
+}
 
 const DEFAULTS = {
   // Where to hunt for businesses, e.g. "Sherbrooke, QC" or "Lisbon, Portugal"
@@ -35,6 +49,7 @@ const DEFAULTS = {
 };
 
 export function loadConfig(root = process.cwd()) {
+  loadEnv(root);
   const file = readJson(resolve(root, "websmith.config.json"), {});
   const cfg = { ...DEFAULTS, ...file, operator: { ...DEFAULTS.operator, ...(file.operator || {}) } };
   cfg.root = root;

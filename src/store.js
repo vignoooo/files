@@ -1,8 +1,14 @@
 import { join } from "node:path";
 import { readJson, writeJson, nowIso } from "./util.js";
 
-// Lead lifecycle: new -> enriched -> built -> deployed -> pitched (or failed/skipped)
-export const STATUSES = ["new", "enriched", "built", "deployed", "pitched", "failed", "skipped"];
+// Build lifecycle: new -> enriched -> built -> qa -> deployed -> pitched
+// CRM lifecycle (after pitched): warm / later / won / lost / lapsed
+// Terminal mishaps: failed / skipped
+export const STATUSES = [
+  "new", "enriched", "built", "qa", "deployed", "pitched",
+  "warm", "later", "won", "lost", "lapsed",
+  "failed", "skipped"
+];
 
 export class Store {
   constructor(dataDir) {

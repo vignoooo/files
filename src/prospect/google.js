@@ -1,4 +1,6 @@
 import { slugify, fetchJson, log } from "../util.js";
+import { checkWebsite } from "./outdated.js";
+import { rankLeads } from "../score.js";
 
 const SEARCH_URL = "https://places.googleapis.com/v1/places:searchText";
 const FIELD_MASK = [
@@ -35,13 +37,18 @@ export async function prospectGoogle(cfg, { limit = 5 } = {}) {
       body: JSON.stringify(body)
     });
     for (const place of data.places || []) {
-      if (place.websiteUri) continue; // already has a website — not a lead
       if (leads.length >= limit) break;
-      leads.push(placeToLead(place, category));
+      const lead = placeToLead(place, category);
+      if (!place.websiteUri) {
+        leads.push(lead); // no website at all — prime lead
+      } else if (cfg.includeOutdated) {
+        const check = await checkWebsite(place.websiteUri);
+        if (check.outdated) leads.push({ ...lead, existingSite: check });
+      }
     }
-    log(`google: "${category} in ${cfg.region}" -> ${leads.length} website-less so far`);
+    log(`google: "${category} in ${cfg.region}" -> ${leads.length} candidates so far`);
   }
-  return leads;
+  return rankLeads(leads);
 }
 
 function placeToLead(place, category) {

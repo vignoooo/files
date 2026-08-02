@@ -12,6 +12,12 @@ const DEFAULTS = {
   builder: "claude",
   // "none" (local preview only), "vercel", or "netlify"
   deployer: "none",
+  // Also target businesses whose existing website is outdated (google prospector only)
+  includeOutdated: true,
+  // Leads to process concurrently per stage ("Run pipeline x3" -> 3)
+  parallel: 1,
+  // Path to a Chromium/Chrome binary for QA screenshots (auto-detected if empty)
+  chromePath: "",
   // Max photos to download per business
   maxPhotos: 6,
   // Language for site copy and the pitch ("en", "fr", ...)

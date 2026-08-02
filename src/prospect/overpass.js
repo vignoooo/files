@@ -1,4 +1,5 @@
 import { slugify, fetchJson, log } from "../util.js";
+import { rankLeads } from "../score.js";
 
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
@@ -44,7 +45,7 @@ out tags center 40;`;
     }
     log(`overpass: "${category}" in ${cfg.region} -> ${leads.length} website-less so far`);
   }
-  return leads;
+  return rankLeads(leads);
 }
 
 async function geocodeArea(region) {

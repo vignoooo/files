@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { downloadGooglePhoto } from "./prospect/google.js";
 import { writeJson, log } from "./util.js";
@@ -34,12 +34,20 @@ export async function enrich(cfg, lead) {
       rating: lead.rating,
       ratingCount: lead.ratingCount,
       reviews: lead.reviews,
-      mapsUrl: lead.mapsUrl
+      mapsUrl: lead.mapsUrl,
+      existingSite: lead.existingSite || null
     },
     photos,
     language: cfg.language,
-    designNotes: cfg.designNotes
+    designNotes: cfg.designNotes,
+    // Cross-run preferences the operator has taught the agent (memory.md).
+    operatorPreferences: readMemory(cfg)
   };
   writeJson(join(siteDir, "brief.json"), brief);
   return { siteDir, photos: photos.length };
+}
+
+function readMemory(cfg) {
+  const path = join(cfg.root || process.cwd(), "memory.md");
+  return existsSync(path) ? readFileSync(path, "utf8") : "";
 }

@@ -22,6 +22,21 @@ export async function buildWithAgent(cfg, lead, siteDir, engine = "claude") {
   }
 }
 
+// QA fix pass: hand the agent the QA report and let it repair the site in place.
+export async function fixWithAgent(cfg, lead, siteDir, report, engine = "claude") {
+  const prompt = `The website in this directory failed QA review. Fix ONLY these issues, keeping the existing design intact, then stop.
+
+Issues:
+${report.issues.map((i) => `- ${i}`).join("\n")}
+${report.warnings.length ? `\nWarnings (fix if quick):\n${report.warnings.map((w) => `- ${w}`).join("\n")}` : ""}
+
+The site must remain fully self-contained (no external scripts/stylesheets) with index.html as the entry point.`;
+  const argv = engine === "codex"
+    ? ["codex", ["exec", "--full-auto", "--cd", siteDir, prompt]]
+    : ["claude", ["-p", prompt, "--permission-mode", "acceptEdits", "--allowedTools", "Read,Write,Edit,Glob,Grep"]];
+  await run(argv[0], argv[1], siteDir);
+}
+
 function run(cmd, args, cwd) {
   return new Promise((resolvePromise, reject) => {
     const child = spawn(cmd, args, { cwd, stdio: ["ignore", "inherit", "inherit"] });

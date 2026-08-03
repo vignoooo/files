@@ -34,9 +34,13 @@ export async function deploySite(cfg, lead, siteDir) {
 
 async function deployVercel(lead, siteDir) {
   const out = await run("vercel", ["deploy", "--prod", "--yes", "--name", `site-${lead.slug}`], stageForUpload(siteDir));
-  const url = out.split(/\s+/).reverse().find((w) => w.startsWith("https://"));
+  // Vercel's output mixes prose and JSON-ish fragments; extract a clean URL
+  // rather than trusting whitespace tokens (a trailing '",' once broke the
+  // demo proxy).
+  const matches = out.match(/https:\/\/[a-zA-Z0-9.-]+\.vercel\.app[^\s"',]*/g);
+  const url = matches?.at(-1);
   if (!url) throw new Error("vercel finished but printed no deployment URL");
-  return url;
+  return new URL(url).toString().replace(/\/$/, "");
 }
 
 async function deployNetlify(lead, siteDir) {

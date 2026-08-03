@@ -192,7 +192,7 @@ async function doctor(cfg) {
 
   ok(vignoEnabled() ? "vigno.ca sync: ON (leads + demos publish to your CRM/domain)" : "vigno.ca sync: off (set VIGNO_WEBSMITH_KEY in .env to enable)", true);
 
-  const chromes = [cfg.chromePath, process.env.CHROME_PATH, "/opt/pw-browsers/chromium", "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/google-chrome"].filter(Boolean);
+  const chromes = [cfg.chromePath, process.env.CHROME_PATH, "/opt/pw-browsers/chromium", "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/google-chrome", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"].filter(Boolean);
   ok("chromium for QA screenshots", chromes.some((p) => existsSync(p)) || await onPath("chromium") || await onPath("google-chrome"), "optional — static QA still runs");
 
   let failures = 0;

@@ -79,6 +79,7 @@ Follow-up nudge drafts appear in `outbox/` automatically when a touch comes due.
 | `categories` | `["restaurant", ...]` | Priority order. |
 | `prospector` | `overpass` \| `google` | `overpass` (OpenStreetMap) is free, no key. `google` finds richer leads (photos, reviews) and needs `GOOGLE_MAPS_API_KEY` (Places API (New)). |
 | `includeOutdated` | bool | Google prospector also targets businesses whose existing site fails heuristics (unreachable, no HTTPS, not mobile-friendly, obsolete HTML...). |
+| `requireEmail` | bool (default true) | Only build for businesses with a published email. Checked during enrich, before the build, so a lead you can't email costs a few fetches instead of a full site. Turn off if you pitch by phone or in person. |
 | `builder` | `claude` \| `codex` \| `template` | `claude` drives headless Claude Code with `prompts/site-brief.md` — needs the CLI and a subscription (Max recommended for throughput). `template` is a no-AI fallback. |
 | `deployer` | `none` \| `vercel` \| `netlify` | `none` keeps sites local. Vercel/Netlify shell out to their CLIs. |
 | `parallel` | number | Leads processed concurrently per stage ("run pipeline x3" → 3). |

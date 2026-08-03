@@ -44,13 +44,15 @@ export async function runCycle(baseCfg, { prospectLimit = 3 } = {}) {
   const store = new Store(cfg.dataDir);
   const n = Math.max(1, cfg.parallel | 0);
 
-  // 1. Prospect — only when the funnel has nothing waiting.
+  // 1. Prospect — only when the funnel has nothing waiting. With the email
+  // gate on, cast a wider net: many candidates won't have a published address.
   if (!store.nextWithStatus("new")) {
+    const limit = Math.max(prospectLimit, n) * (cfg.requireEmail ? 5 : 1);
     log(`prospect: hunting in "${cfg.region}"...`);
     try {
       const found = cfg.prospector === "google"
-        ? await prospectGoogle(cfg, { limit: Math.max(prospectLimit, n) })
-        : await prospectOverpass(cfg, { limit: Math.max(prospectLimit, n) });
+        ? await prospectGoogle(cfg, { limit })
+        : await prospectOverpass(cfg, { limit });
       let added = 0;
       for (const lead of found) if (store.add(lead)) added++;
       log(`prospect: ${found.length} candidates (ranked), ${added} new leads added`);
@@ -59,11 +61,29 @@ export async function runCycle(baseCfg, { prospectLimit = 3 } = {}) {
     }
   }
 
-  await stage(store, "new", n, async (lead) => {
-    const { siteDir, photos, contact } = await enrich(cfg, lead);
-    log(`enrich: ${lead.name} — workspace ready, ${photos} photo(s)${contact.email ? `, email found (${contact.source})` : ""}`);
-    store.advance(lead, "enriched", { siteDir, email: contact.email, emailSource: contact.source });
-  });
+  // 2a. Enrich — sequential, and with the email gate on it keeps working
+  // through candidates until `n` of them clear the gate. Cheap either way:
+  // rejected leads bail before any photo download.
+  let enriched = 0;
+  let rejected = 0;
+  for (const lead of store.leads.filter((l) => l.status === "new")) {
+    if (enriched >= n) break;
+    try {
+      const { siteDir, photos, contact, skipped } = await enrich(cfg, lead);
+      if (skipped) {
+        store.advance(lead, "skipped", { skipReason: skipped });
+        rejected++;
+        continue;
+      }
+      log(`enrich: ${lead.name} — workspace ready, ${photos} photo(s)${contact.email ? `, email: ${contact.email} (${contact.source})` : ""}`);
+      store.advance(lead, "enriched", { siteDir, email: contact.email, emailSource: contact.source });
+      enriched++;
+    } catch (err) {
+      log(`enrich: ${lead.name} failed — ${err.message}`);
+      store.advance(lead, "failed", { error: err.message });
+    }
+  }
+  if (rejected) log(`enrich: ${rejected} lead(s) skipped for having no published email address`);
 
   await stage(store, "enriched", n, async (lead) => {
     if (cfg.builder === "template") buildWithTemplate(cfg, lead, lead.siteDir);

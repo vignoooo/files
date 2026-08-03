@@ -134,3 +134,11 @@ test("pitch uses the matching VIGNO vertical angle", async () => {
   const resto = readFileSync(join(outboxDir, "r1.md"), "utf8");
   assert.match(resto, /commission de plateforme/);
 });
+
+test("contact discovery checks site, contact pages, and facebook", async () => {
+  const { discoverContact } = await import("../src/enrich/contact.js");
+  // No sources at all -> no email, and the gate can act on it.
+  const none = await discoverContact({ name: "No Web Biz" }, {});
+  assert.equal(none.email, null);
+  assert.equal(none.source, null);
+});

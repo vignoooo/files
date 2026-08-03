@@ -8,8 +8,10 @@ natural language; you drive the pipeline and customise the project on request.
 ## The pipeline
 
 `node bin/websmith.js run` executes one cycle:
-prospect (ranked by buy-likelihood) -> enrich (photos, reviews, hours into
-`sites/<slug>/brief.json`) -> build (headless agent follows `prompts/site-brief.md`)
+prospect (ranked by buy-likelihood) -> enrich (contact gate + photos, reviews,
+hours into `sites/<slug>/brief.json`; with `requireEmail` on, a lead with no
+published email is skipped here, before any build) -> build (headless agent
+follows `prompts/site-brief.md`)
 -> QA (static checks + desktop/mobile screenshots, one automatic fix pass)
 -> deploy -> pitch draft in `outbox/`.
 

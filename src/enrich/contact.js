@@ -35,23 +35,35 @@ async function fetchHtml(url) {
   return res.text();
 }
 
-// Checks the business's website (plus its /contact page) and public Facebook
-// page. Returns { email, source } or { email: null }.
+// Common contact-page paths on small-business sites (FR + EN).
+const CONTACT_PATHS = ["/contact", "/contactez-nous", "/nous-joindre", "/contact-us", "/about", "/a-propos"];
+
+// Checks every public place a business publishes its address: its own site
+// (home + contact pages), its public Facebook page, and its Google Business
+// profile page. Returns { email, source } or { email: null }.
 export async function discoverContact(lead, socials = {}) {
   const attempts = [];
-  if (lead.existingSite?.url) {
-    attempts.push({ url: lead.existingSite.url, source: "website" });
-    attempts.push({ url: new URL("/contact", lead.existingSite.url).toString(), source: "website" });
+  const site = lead.existingSite?.url || lead.websiteUri;
+  if (site) {
+    attempts.push({ url: site, source: "website" });
+    for (const path of CONTACT_PATHS) {
+      try { attempts.push({ url: new URL(path, site).toString(), source: "website" }); } catch { /* bad base */ }
+    }
   }
-  if (socials.facebook) attempts.push({ url: socials.facebook, source: "facebook" });
+  if (socials.facebook) {
+    attempts.push({ url: socials.facebook, source: "facebook" });
+    attempts.push({ url: socials.facebook.replace(/\/$/, "") + "/about", source: "facebook" });
+  }
 
+  const seen = new Set();
   for (const { url, source } of attempts) {
+    if (seen.has(url)) continue;
+    seen.add(url);
     try {
       const emails = extractEmails(await fetchHtml(url));
       if (emails.length) return { email: emails[0], source };
-    } catch (err) {
-      log(`contact: ${source} check skipped (${err.message})`);
-    }
+    } catch { /* try the next candidate quietly */ }
   }
+  log(`contact: no published email found for ${lead.name}`);
   return { email: null, source: null };
 }

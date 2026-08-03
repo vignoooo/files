@@ -48,6 +48,10 @@ const DEFAULTS = {
   deployer: "none",
   // Also target businesses whose existing website is outdated (google prospector only)
   includeOutdated: true,
+  // Only build for businesses with a published email address to pitch to.
+  // Checked during enrich, BEFORE the build — leads without one are skipped
+  // instead of burning a build on a site that can't be sent anywhere.
+  requireEmail: true,
   // Leads to process concurrently per stage ("Run pipeline x3" -> 3)
   parallel: 1,
   // Path to a Chromium/Chrome binary for QA screenshots (auto-detected if empty)

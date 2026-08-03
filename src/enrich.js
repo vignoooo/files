@@ -33,6 +33,20 @@ export async function enrich(cfg, lead) {
     }
   }
 
+  // Scan the business's own web presence once: it yields both photo candidates
+  // and the social links used for contact discovery.
+  const gathered = await gatherWebPhotoUrls(lead, cfg.maxPhotos);
+  const socials = gathered.socials;
+
+  // CONTACT GATE — before any expensive work. A demo site is only worth
+  // building if there's a published address to send the link to, so with
+  // requireEmail on, a lead with no discoverable email is dropped here
+  // rather than after a full build + deploy.
+  const contact = await discoverContact(lead, socials);
+  if (cfg.requireEmail && !contact.email) {
+    return { siteDir, photos: 0, contact, skipped: "no published email address" };
+  }
+
   // Photo sources, in order of quality: Google Places, then the business's
   // existing website, then the public og:image of linked Instagram/Facebook.
   const photos = [];
@@ -49,18 +63,13 @@ export async function enrich(cfg, lead) {
     }
   }
 
-  let socials = { instagram: null, facebook: null };
-  if (photos.length < cfg.maxPhotos) {
-    const gathered = await gatherWebPhotoUrls(lead, cfg.maxPhotos - photos.length);
-    socials = gathered.socials;
-    if (gathered.urls.length) {
-      const extra = await downloadPhotos(gathered.urls, assetsDir, {
-        startIndex: photos.length,
-        max: cfg.maxPhotos - photos.length
-      });
-      photos.push(...extra);
-      if (extra.length) log(`enrich: ${extra.length} photo(s) from website/socials for ${lead.name}`);
-    }
+  if (photos.length < cfg.maxPhotos && gathered.urls.length) {
+    const extra = await downloadPhotos(gathered.urls, assetsDir, {
+      startIndex: photos.length,
+      max: cfg.maxPhotos - photos.length
+    });
+    photos.push(...extra);
+    if (extra.length) log(`enrich: ${extra.length} photo(s) from website/socials for ${lead.name}`);
   }
 
   const brief = {
@@ -84,10 +93,6 @@ export async function enrich(cfg, lead) {
     operatorPreferences: readMemory(cfg)
   };
   writeJson(join(siteDir, "brief.json"), brief);
-
-  // Published email discovery (website + public Facebook page) — the only
-  // kind of address auto-outreach is ever allowed to use.
-  const contact = await discoverContact(lead, socials);
   return { siteDir, photos: photos.length, contact };
 }
 

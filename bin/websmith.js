@@ -204,7 +204,8 @@ async function main() {
 }
 
 function requireRegion(cfg) {
-  if (!cfg.region) throw new Error('No region configured. Run "websmith init" and set "region".');
+  const hasRotation = Array.isArray(cfg.regions) && cfg.regions.length;
+  if (!cfg.region && !hasRotation) throw new Error('No region configured. Run "websmith init" and set "region" (or "regions").');
 }
 
 // Mirror a CRM stage change to the vigno.ca dashboard, best-effort.
@@ -225,7 +226,8 @@ async function doctor(cfg) {
   const [maj, min] = process.versions.node.split(".").map(Number);
   ok(`node ${process.versions.node}`, maj > 18 || (maj === 18 && min >= 17), "need >= 18.17");
   ok("websmith.config.json", existsSync(resolve(cfg.root, "websmith.config.json")), 'run "websmith init"');
-  ok(`region: ${cfg.region || "(unset)"}`, !!cfg.region, "required");
+  const hasRotation = Array.isArray(cfg.regions) && cfg.regions.length;
+  ok(hasRotation ? `region rotation: ${cfg.regions.length} regions` : `region: ${cfg.region || "(unset)"}`, !!cfg.region || hasRotation, "required");
   ok(`operator: ${cfg.operator.name || "(unset)"}`, !!cfg.operator.name, "signs your pitches");
 
   if (cfg.prospector === "google") ok("GOOGLE_MAPS_API_KEY", !!cfg.googleApiKey, "required for google prospector");

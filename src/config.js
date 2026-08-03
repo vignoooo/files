@@ -83,7 +83,10 @@ export function loadConfig(root = process.cwd()) {
     operator: { ...DEFAULTS.operator, ...(file.operator || {}) },
     outreach: { ...DEFAULTS.outreach, ...(file.outreach || {}) }
   };
-  if (cfg.regions === "quebec") cfg.regions = QUEBEC_REGIONS;
+  if (typeof cfg.regions === "string") {
+    const key = cfg.regions.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    cfg.regions = key === "quebec" ? QUEBEC_REGIONS : [cfg.regions];
+  }
   cfg.root = root;
   cfg.dataDir = resolve(root, cfg.dataDir);
   cfg.sitesDir = resolve(root, cfg.sitesDir);

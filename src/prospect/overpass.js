@@ -100,6 +100,7 @@ function elementToLead(el, category) {
     hours: t.opening_hours ? [t.opening_hours] : [],
     reviews: [],
     photoRefs: [],
-    mapsUrl: `https://www.openstreetmap.org/${el.type}/${el.id}`
+    // Google Maps search link — what the business owner actually uses.
+    mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([name, address].filter(Boolean).join(" "))}`
   };
 }

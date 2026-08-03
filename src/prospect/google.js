@@ -74,6 +74,23 @@ function placeToLead(place, category) {
   };
 }
 
+// Looks up a single business by name (+ address/region) — used to upgrade
+// leads found by other prospectors with Google's photos, reviews and rating.
+export async function lookupPlace(cfg, query) {
+  if (!cfg.googleApiKey) return null;
+  const data = await fetchJson(SEARCH_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": cfg.googleApiKey,
+      "X-Goog-FieldMask": FIELD_MASK
+    },
+    body: JSON.stringify({ textQuery: query, pageSize: 1 })
+  });
+  const place = data.places?.[0];
+  return place ? placeToLead(place, "") : null;
+}
+
 // Google Places photo media endpoint: returns the binary image.
 export async function downloadGooglePhoto(cfg, photoRef, maxWidth = 1600) {
   const url = `https://places.googleapis.com/v1/${photoRef}/media?maxWidthPx=${maxWidth}&key=${cfg.googleApiKey}`;

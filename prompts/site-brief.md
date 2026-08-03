@@ -41,6 +41,33 @@ active voice, specifics over abstractions.
 
 (`cold-email` in `.claude/skills/` is for outreach drafting, not site builds.)
 
+## Quality bar — read this twice
+
+This site will be pitched to the business owner as work worth $999+. It must look
+like a boutique agency spent a week on it, not like a generated page. Concretely:
+
+- A one-screen hero is not enough: build 6-9 distinct, art-directed sections with
+  varied layouts (asymmetric grids, overlapping elements, alternating rhythm) — never
+  a single centered column of stacked text blocks.
+- Commit to a strong aesthetic point of view from the design-tokens phase: an
+  unexpected-but-fitting palette, a characterful display/body type pairing (system
+  font stacks chosen with intent, or embedded @font-face ONLY if self-contained),
+  oversized typography moments, generous negative space.
+- Add polish details: scroll-reveal micro-interactions (CSS-only or a few lines of
+  JS), hover states with personality, a sticky nav that condenses, smooth-scroll
+  anchors, a distinctive footer. Subtle — no animation circus.
+- Photos, when present in assets/, are the soul of the site: full-bleed hero
+  treatments, editorial crops, layered galleries. With no photos, compensate with
+  bold graphic treatments (patterns, gradients, typographic compositions) — never
+  leave sections looking empty.
+- Services/offer section built from what the category implies (services a
+  {category} plainly offers may be listed generically — "oil changes, brakes,
+  tires" for a garage — but NEVER invent prices, specialties, or claims).
+- The code budget is up to ~1800 lines — use it for craft, not filler.
+
+If the design-review phase would score this below "would proudly show a client",
+iterate before finishing.
+
 ## Hard requirements
 
 - Output a static site in the target directory: `index.html` as the entry point, with
@@ -64,8 +91,7 @@ active voice, specifics over abstractions.
 - Fully responsive, semantic HTML, accessible (contrast, alt text, focus states),
   and fast (no assets beyond what is in `assets/`).
 - Add a `<meta name="description">` and a proper `<title>`.
-- Keep total hand-written code under ~1200 lines. One page is enough; multiple sections,
-  smooth-scroll nav.
+- One page is enough; multiple sections, smooth-scroll nav (code budget above).
 
 ## Honesty requirements
 

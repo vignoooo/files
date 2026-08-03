@@ -41,6 +41,9 @@ const DEFAULTS = {
   prospector: "overpass",
   // "claude" (headless Claude Code), "codex" (codex exec), or "template" (built-in, no AI)
   builder: "claude",
+  // Model for the claude builder ("opus" strongly recommended on a Max plan —
+  // it's the single biggest site-quality lever). Empty = CLI default.
+  builderModel: "opus",
   // "none" (local preview only), "vercel", or "netlify"
   deployer: "none",
   // Also target businesses whose existing website is outdated (google prospector only)

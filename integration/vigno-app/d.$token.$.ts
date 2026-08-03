@@ -52,17 +52,34 @@ async function handle(request: Request, params: { token: string; _splat?: string
   reqHeaders.delete("cookie"); // don't forward vigno cookies to upstream
   reqHeaders.set("accept-encoding", "identity");
 
+  // Follow redirects SERVER-SIDE (https only, max 5 hops) so the visitor's
+  // address bar never leaves vigno.ca — hosting providers love to bounce
+  // between deployment aliases.
   let upstream: Response;
+  let finalUrl = upstreamUrl;
   try {
-    upstream = await fetch(upstreamUrl.toString(), {
-      method: request.method,
-      headers: reqHeaders,
-      body: request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer(),
-      redirect: "manual",
-    });
+    const body = request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer();
+    for (let hop = 0; ; hop++) {
+      upstream = await fetch(finalUrl.toString(), {
+        method: request.method,
+        headers: reqHeaders,
+        body,
+        redirect: "manual",
+      });
+      if (upstream.status < 300 || upstream.status >= 400) break;
+      const loc = upstream.headers.get("location");
+      if (!loc || hop >= 5) break;
+      const next = new URL(loc, finalUrl);
+      if (next.protocol !== "https:") break;
+      finalUrl = next;
+    }
   } catch (e: any) {
     return new Response(`Upstream fetch failed: ${e?.message ?? "error"}`, { status: 502 });
   }
+  // Everything below rewrites against the origin that actually served the page.
+  const servedBase = new URL(finalUrl.origin + "/");
+  upstreamBase = servedBase;
+  upstreamUrl = finalUrl;
 
   const proxyPrefix = `/d/${params.token}/`;
   const outHeaders = new Headers();

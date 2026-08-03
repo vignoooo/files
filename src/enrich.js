@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { downloadGooglePhoto } from "./prospect/google.js";
+import { downloadGooglePhoto, lookupPlace } from "./prospect/google.js";
 import { gatherWebPhotoUrls, downloadPhotos } from "./enrich/photos.js";
 import { discoverContact } from "./enrich/contact.js";
 import { writeJson, log } from "./util.js";
@@ -12,10 +12,31 @@ export async function enrich(cfg, lead) {
   const assetsDir = join(siteDir, "assets");
   mkdirSync(assetsDir, { recursive: true });
 
+  // Leads found by other prospectors get upgraded with Google's data when a
+  // key is available: photos, reviews, rating, phone, and a real maps link.
+  if (lead.source !== "google" && cfg.googleApiKey && !lead.photoRefs?.length) {
+    try {
+      const match = await lookupPlace(cfg, `${lead.name} ${lead.address || cfg.region}`);
+      // Sanity check: only merge when it's plausibly the same business.
+      if (match && match.slug.split("-")[0] === lead.slug.split("-")[0]) {
+        lead.photoRefs = match.photoRefs;
+        lead.reviews = lead.reviews?.length ? lead.reviews : match.reviews;
+        lead.rating = lead.rating ?? match.rating;
+        lead.ratingCount = lead.ratingCount || match.ratingCount;
+        lead.phone = lead.phone || match.phone;
+        lead.hours = lead.hours?.length ? lead.hours : match.hours;
+        lead.mapsUrl = match.mapsUrl || lead.mapsUrl;
+        log(`enrich: ${lead.name} — upgraded with Google data (${match.photoRefs.length} photos, ${match.ratingCount} ratings)`);
+      }
+    } catch (err) {
+      log(`enrich: google upgrade skipped — ${err.message}`);
+    }
+  }
+
   // Photo sources, in order of quality: Google Places, then the business's
   // existing website, then the public og:image of linked Instagram/Facebook.
   const photos = [];
-  if (lead.source === "google" && lead.photoRefs.length && cfg.googleApiKey) {
+  if (lead.photoRefs?.length && cfg.googleApiKey) {
     for (const ref of lead.photoRefs.slice(0, cfg.maxPhotos)) {
       try {
         const buf = await downloadGooglePhoto(cfg, ref);

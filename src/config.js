@@ -72,6 +72,9 @@ const DEFAULTS = {
   designNotes: "",
   // Seconds between pipeline cycles in daemon mode
   daemonIntervalSeconds: 3600,
+  // Let the daemon pull the latest websmith code once a day (never touches
+  // .env, websmith.config.json, data/, sites/ or outbox/)
+  autoUpdate: true,
   // Directories (relative to project root)
   dataDir: "data",
   sitesDir: "sites",

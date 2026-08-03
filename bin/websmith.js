@@ -27,6 +27,7 @@ Pipeline:
   websmith retry <slug>         Reset a failed lead to its last good stage
   websmith retire <slug>        Take a demo offline (owner asked, or cleanup)
   websmith outreach             Send due auto-outreach now (respects gates/caps)
+  websmith update               Pull the latest websmith code (keeps your config/leads)
   websmith install-autostart    Run the daemon 24/7 via macOS launchd
   websmith doctor               Check the machine: node, chromium, builder CLI, config, keys
 
@@ -153,6 +154,11 @@ async function main() {
       if (!readiness.ready) throw new Error(`auto-send not configured — missing: ${readiness.missing.join(", ")}`);
       const sent = await runOutreach(cfg, store());
       log(`outreach: ${sent} email(s) sent`);
+      break;
+    }
+    case "update": {
+      const { selfUpdate } = await import("../src/update.js");
+      await selfUpdate(cfg);
       break;
     }
     case "install-autostart": {

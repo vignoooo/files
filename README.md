@@ -109,6 +109,19 @@ Photos now come from up to three public sources per lead: Google Places, the
 business's existing website, and the public og:image of Instagram/Facebook pages
 linked from it.
 
+## Staying up to date
+
+```bash
+node bin/websmith.js update    # pull the latest code, keep everything of yours
+```
+
+Works whether the project was cloned or downloaded as a ZIP (the first run
+links the folder to the repository). `.env`, `websmith.config.json`, `data/`,
+`sites/`, `outbox/` and `logs/` are never touched; `memory.md` is kept and the
+incoming version is saved beside it as `memory.md.incoming`. With
+`autoUpdate: true` (default) the daemon does this once a day on its own and
+restarts itself on the new version.
+
 ## Scale mode: whole province, every category, 24/7
 
 - `"regions": "quebec"` rotates each cycle through 28 Québec cities/towns

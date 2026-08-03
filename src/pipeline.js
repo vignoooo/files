@@ -173,9 +173,28 @@ async function stage(store, status, n, fn) {
   }));
 }
 
+const DAY_MS = 86400000;
+
 export async function runDaemon(cfg) {
   log(`daemon: starting — one cycle every ${cfg.daemonIntervalSeconds}s. Ctrl-C to stop.`);
+  let lastUpdateCheck = 0;
   for (;;) {
+    // Once a day, pull the latest code. Only source files change; config,
+    // leads, built sites and drafts are untouched. A failure never stops
+    // the pipeline — it just logs and carries on with the current version.
+    if (cfg.autoUpdate && Date.now() - lastUpdateCheck > DAY_MS) {
+      lastUpdateCheck = Date.now();
+      try {
+        const { selfUpdate } = await import("./update.js");
+        const { updated } = await selfUpdate(cfg);
+        if (updated) {
+          log("daemon: new version installed — restarting to load it");
+          process.exit(0); // launchd/KeepAlive restarts us on the new code
+        }
+      } catch (err) {
+        log(`daemon: auto-update skipped — ${err.message.split("\n")[0]}`);
+      }
+    }
     const summary = await runCycle(cfg);
     log(`daemon: cycle done — ${JSON.stringify(summary.counts)}`);
     await sleep(cfg.daemonIntervalSeconds * 1000);

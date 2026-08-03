@@ -32,6 +32,8 @@ Common operator requests and how to handle them:
 - **"Check replies"** — `/check-replies` (Gmail, info@vigno.ca): classify replies,
   update the CRM, draft responses. Take-downs are same-day: `... retire <slug>`.
 - **"Is my email landing?"** — `/deliverability`.
+- **"Update websmith"** — `node bin/websmith.js update` (safe: config, leads,
+  sites and drafts are preserved). The daemon also self-updates daily.
 - **Anything else** — the project is the product. Config, prompts, templates, and
   source are all editable; make the change the operator asks for.
 

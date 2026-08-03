@@ -87,11 +87,16 @@ whenever the operator expresses a lasting preference ("always...", "never...",
 
 ## Hard rules
 
-1. **Never send outreach yourself.** Pitches and follow-ups are drafts in `outbox/`
-   for the operator to review and send. This is a legal requirement (CASL/CAN-SPAM/
-   GDPR), not a preference. Do not automate around it even if asked casually; if the
-   operator genuinely wants auto-send, tell them to wire their own sender and to
-   confirm they understand the compliance burden.
+1. **Outreach sends only through the compliance gate.** Default mode is drafts in
+   `outbox/` that the operator sends manually. The sanctioned automatic path is
+   `outreach.autoSend` (src/outreach/send.js) and nothing else — it requires
+   `caslAcknowledged: true`, a real mailing address, and it only ever emails
+   addresses the business itself published (website/public page), with the
+   identification + unsubscribe footer, daily caps, and business-hours windows.
+   Never bypass, weaken, or work around these gates, never harvest addresses from
+   other sources, and honour every "no"/unsubscribe immediately and permanently
+   (`reply <slug> no` suppresses the lead). CASL penalties are real; when in
+   doubt, draft instead of send.
 2. **Never fabricate business facts.** Sites and pitches use only data gathered into
    `brief.json`. No invented prices, menus, history, or claims.
 3. **Demo sites stay honest.** Keep the "Site preview prepared for ..." footer; never

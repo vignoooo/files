@@ -108,6 +108,37 @@ Photos now come from up to three public sources per lead: Google Places, the
 business's existing website, and the public og:image of Instagram/Facebook pages
 linked from it.
 
+## Scale mode: whole province, every category, 24/7
+
+- `"regions": "quebec"` rotates each cycle through 28 Québec cities/towns
+  (or supply your own array). `"categories": "all"` hunts every category
+  websmith knows (30+, from garages to notaries).
+- `websmith install-autostart` (macOS) registers the daemon with launchd: starts
+  at login, restarts if it dies, logs to `logs/daemon.log`. The Mac must stay
+  awake — enable "Prevent automatic sleeping on power adapter" in System
+  Settings, or run it on a machine that never sleeps.
+
+## Auto-send (read before enabling)
+
+By default websmith only drafts; you send. `outreach.autoSend: true` turns on
+automatic sending, and it is deliberately hard to arm — every gate must pass:
+
+1. `caslAcknowledged: true` — you accept that unsolicited commercial email is
+   regulated (CASL in Canada) and that you're the sender of record.
+2. `operator.address` — a real mailing address, printed in every email (the law
+   requires it).
+3. `SMTP_PASSWORD` in `.env` — a Gmail app password for `operator.email`.
+4. Per lead: only addresses the business itself published (its website or
+   public Facebook page) are ever used — that's CASL's implied-consent basis,
+   and leads without a published address stay manual.
+
+Every message carries your identification block and an unsubscribe line;
+sending happens Mon–Fri inside `windowHours`, capped at `dailyCap`/day
+(start at 10–15 and run `/deliverability` first — new senders who blast get
+spam-foldered). A "no" reply (`websmith reply <slug> no`, or `/check-replies`)
+suppresses the lead permanently. `websmith outreach` runs a send pass manually;
+the daemon runs one every cycle.
+
 ## QA: it checks its own work
 
 After every build, `src/qa.js` runs static checks (self-containment, broken local

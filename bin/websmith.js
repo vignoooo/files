@@ -26,6 +26,8 @@ Pipeline:
   websmith preview <slug>       Serve a built site on http://localhost:8787
   websmith retry <slug>         Reset a failed lead to its last good stage
   websmith retire <slug>        Take a demo offline (owner asked, or cleanup)
+  websmith outreach             Send due auto-outreach now (respects gates/caps)
+  websmith install-autostart    Run the daemon 24/7 via macOS launchd
   websmith doctor               Check the machine: node, chromium, builder CLI, config, keys
 
 CRM (after a pitch is drafted):
@@ -145,6 +147,53 @@ async function main() {
       log(`${lead.name} reset to "${back}" — run: websmith run`);
       break;
     }
+    case "outreach": {
+      const { runOutreach, autoSendReady } = await import("../src/outreach/send.js");
+      const readiness = autoSendReady(cfg);
+      if (!readiness.ready) throw new Error(`auto-send not configured — missing: ${readiness.missing.join(", ")}`);
+      const sent = await runOutreach(cfg, store());
+      log(`outreach: ${sent} email(s) sent`);
+      break;
+    }
+    case "install-autostart": {
+      if (process.platform !== "darwin") throw new Error("install-autostart currently supports macOS (launchd) only.");
+      const { writeFileSync, mkdirSync } = await import("node:fs");
+      const { homedir } = await import("node:os");
+      const label = "ca.vigno.websmith";
+      const plistPath = join(homedir(), "Library", "LaunchAgents", `${label}.plist`);
+      const logDir = join(cfg.root, "logs");
+      mkdirSync(join(homedir(), "Library", "LaunchAgents"), { recursive: true });
+      mkdirSync(logDir, { recursive: true });
+      writeFileSync(plistPath, `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>${label}</string>
+  <key>ProgramArguments</key><array>
+    <string>${process.execPath}</string>
+    <string>${join(cfg.root, "bin", "websmith.js")}</string>
+    <string>daemon</string>
+  </array>
+  <key>WorkingDirectory</key><string>${cfg.root}</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>${join(logDir, "daemon.log")}</string>
+  <key>StandardErrorPath</key><string>${join(logDir, "daemon.log")}</string>
+  <key>EnvironmentVariables</key><dict>
+    <key>PATH</key><string>${process.env.PATH || "/usr/local/bin:/usr/bin:/bin"}</string>
+  </dict>
+</dict></plist>
+`);
+      const { execFile: ef } = await import("node:child_process");
+      const { promisify: pr } = await import("node:util");
+      await pr(ef)("launchctl", ["unload", plistPath]).catch(() => {});
+      await pr(ef)("launchctl", ["load", plistPath]);
+      log(`installed: websmith daemon now runs 24/7 (starts at login, restarts if it dies)`);
+      log(`log file:  ${join(logDir, "daemon.log")}  — watch with: tail -f logs/daemon.log`);
+      log(`stop with: launchctl unload ${plistPath}`);
+      log(`NOTE: your Mac must be awake. System Settings -> Displays -> Advanced ->`);
+      log(`"Prevent automatic sleeping on power adapter when the display is off" (plugged in).`);
+      break;
+    }
     case "doctor":
       await doctor(cfg);
       break;
@@ -191,6 +240,13 @@ async function doctor(cfg) {
   else ok("deployer: none (local preview)", true);
 
   ok(vignoEnabled() ? "vigno.ca sync: ON (leads + demos publish to your CRM/domain)" : "vigno.ca sync: off (set VIGNO_WEBSMITH_KEY in .env to enable)", true);
+
+  if (cfg.outreach?.autoSend) {
+    const { autoSendReady } = await import("../src/outreach/send.js");
+    const r = autoSendReady(cfg);
+    ok(r.ready ? `auto-send: ON (cap ${cfg.outreach.dailyCap}/day, Mon-Fri ${cfg.outreach.windowHours.join("-")}h)` : `auto-send: ON but missing ${r.missing.join(", ")}`, r.ready);
+  } else ok("auto-send: off (drafts only — you send manually)", true);
+  if (Array.isArray(cfg.regions) && cfg.regions.length) ok(`region rotation: ${cfg.regions.length} regions`, true);
 
   const chromes = [cfg.chromePath, process.env.CHROME_PATH, "/opt/pw-browsers/chromium", "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/google-chrome", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"].filter(Boolean);
   ok("chromium for QA screenshots", chromes.some((p) => existsSync(p)) || await onPath("chromium") || await onPath("google-chrome"), "optional — static QA still runs");

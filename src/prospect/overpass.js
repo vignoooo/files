@@ -6,7 +6,7 @@ const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
 const USER_AGENT = "websmith/0.1 (autonomous website agency pipeline)";
 
 // Maps friendly category names onto OSM tag filters.
-const CATEGORY_TAGS = {
+export const CATEGORY_TAGS = {
   restaurant: '["amenity"="restaurant"]',
   cafe: '["amenity"="cafe"]',
   bakery: '["shop"="bakery"]',
@@ -19,8 +19,27 @@ const CATEGORY_TAGS = {
   gym: '["leisure"="fitness_centre"]',
   salon: '["shop"="beauty"]',
   landscaping: '["craft"="gardener"]',
-  construction: '["craft"="builder"]'
+  construction: '["craft"="builder"]',
+  electrician: '["craft"="electrician"]',
+  roofer: '["craft"="roofer"]',
+  painter: '["craft"="painter"]',
+  carpenter: '["craft"="carpenter"]',
+  photographer: '["craft"="photographer"]',
+  caterer: '["craft"="caterer"]',
+  "moving company": '["office"="moving_company"]',
+  accountant: '["office"="accountant"]',
+  "real estate": '["office"="estate_agent"]',
+  dentist: '["amenity"="dentist"]',
+  veterinarian: '["amenity"="veterinary"]',
+  "driving school": '["amenity"="driving_school"]',
+  daycare: '["amenity"="childcare"]',
+  massage: '["shop"="massage"]',
+  tattoo: '["shop"="tattoo"]',
+  "pet grooming": '["shop"="pet_grooming"]',
+  laundry: '["shop"="laundry"]'
 };
+
+export const ALL_CATEGORIES = Object.keys(CATEGORY_TAGS);
 
 // Free prospector: OpenStreetMap businesses in the region with no website/contact tag.
 export async function prospectOverpass(cfg, { limit = 5 } = {}) {

@@ -64,7 +64,9 @@ function angleFor(category, fr) {
     : "A site takes requests and bookings, even while you're busy.";
 }
 
-export function draftPitch(cfg, lead, liveUrl) {
+// Subject + body only (no file) — reused by the outbox draft and the
+// auto-sender.
+export function pitchContent(cfg, lead, liveUrl) {
   const fr = cfg.language === "fr";
   const hook = fr
     ? (lead.rating ? `vos ${lead.ratingCount} avis à ${lead.rating}★` : lead.address ? `votre commerce sur ${lead.address.split(",")[0]}` : "votre commerce")
@@ -98,6 +100,11 @@ Worth two minutes of your time?
 
 ${signature(cfg)}`;
 
+  return { subject, body };
+}
+
+export function draftPitch(cfg, lead, liveUrl) {
+  const { subject, body } = pitchContent(cfg, lead, liveUrl);
   mkdirSync(cfg.outboxDir, { recursive: true });
   const file = join(cfg.outboxDir, `${lead.slug}.md`);
   writeFileSync(file, `---

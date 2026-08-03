@@ -74,7 +74,7 @@ export function crmReport(store, now = Date.now()) {
 // Short follow-up drafts. Touch 1 is the full pitch (src/pitch.js); touches 2-5
 // rotate angles per the cold-email skill: nudge -> proof + price -> ownership ->
 // breakup. Written to the outbox for the operator to send.
-export function draftFollowup(cfg, lead, touchN) {
+export function followupContent(cfg, lead, touchN) {
   const fr = cfg.language === "fr";
   const url = lead.liveUrl || "";
   const bodies = fr ? [
@@ -93,13 +93,17 @@ export function draftFollowup(cfg, lead, touchN) {
   const body = bodies[touchN - 1];
   if (!body) throw new Error(`no follow-up template for touch ${touchN}`);
   const subject = fr ? `Re: un site web pour ${lead.name}` : `Re: a website for ${lead.name}`;
+  return { subject, body };
+}
 
+export function draftFollowup(cfg, lead, touchN) {
+  const { subject, body } = followupContent(cfg, lead, touchN);
   mkdirSync(cfg.outboxDir, { recursive: true });
   const file = join(cfg.outboxDir, `${lead.slug}-touch-${touchN}.md`);
   writeFileSync(file, `---
 business: ${lead.name}
 touch: ${touchN} of ${TOUCH_OFFSETS_DAYS.length}
-site: ${url}
+site: ${lead.liveUrl || ""}
 drafted: ${nowIso()}
 status: DRAFT — review and send manually
 ---

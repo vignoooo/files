@@ -1,7 +1,9 @@
 import { join } from "node:path";
 import { Store } from "./store.js";
 import { prospectGoogle } from "./prospect/google.js";
-import { prospectOverpass } from "./prospect/overpass.js";
+import { prospectOverpass, ALL_CATEGORIES } from "./prospect/overpass.js";
+import { runOutreach, autoSendReady } from "./outreach/send.js";
+import { readJson, writeJson } from "./util.js";
 import { enrich } from "./enrich.js";
 import { buildWithAgent, fixWithAgent } from "./build/claude.js";
 import { buildWithTemplate } from "./build/template.js";
@@ -14,7 +16,31 @@ import { log, sleep } from "./util.js";
 
 // One full cycle: top up leads, then march every stage forward.
 // cfg.parallel controls how many leads move through each stage concurrently.
-export async function runCycle(cfg, { prospectLimit = 3 } = {}) {
+// Round-robin across cfg.regions (or stick to cfg.region when unset), and
+// expand categories: "all" when the operator hunts every known type.
+function cycleConfig(cfg) {
+  const out = { ...cfg };
+  if (out.categories === "all") out.categories = shuffle(ALL_CATEGORIES);
+  if (Array.isArray(cfg.regions) && cfg.regions.length) {
+    const path = join(cfg.dataDir, "rotation.json");
+    const state = readJson(path, { i: 0 });
+    out.region = cfg.regions[state.i % cfg.regions.length];
+    writeJson(path, { i: (state.i + 1) % cfg.regions.length });
+  }
+  return out;
+}
+
+function shuffle(list) {
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+export async function runCycle(baseCfg, { prospectLimit = 3 } = {}) {
+  const cfg = cycleConfig(baseCfg);
   const store = new Store(cfg.dataDir);
   const n = Math.max(1, cfg.parallel | 0);
 
@@ -34,9 +60,9 @@ export async function runCycle(cfg, { prospectLimit = 3 } = {}) {
   }
 
   await stage(store, "new", n, async (lead) => {
-    const { siteDir, photos } = await enrich(cfg, lead);
-    log(`enrich: ${lead.name} — workspace ready, ${photos} photo(s)`);
-    store.advance(lead, "enriched", { siteDir });
+    const { siteDir, photos, contact } = await enrich(cfg, lead);
+    log(`enrich: ${lead.name} — workspace ready, ${photos} photo(s)${contact.email ? `, email found (${contact.source})` : ""}`);
+    store.advance(lead, "enriched", { siteDir, email: contact.email, emailSource: contact.source });
   });
 
   await stage(store, "enriched", n, async (lead) => {
@@ -101,6 +127,16 @@ export async function runCycle(cfg, { prospectLimit = 3 } = {}) {
     }
   }
   if (crm.due.length) log(`crm: ${crm.due.length} follow-up(s) due — see "websmith crm"`);
+
+  // 4. Automatic outreach (only when fully configured and acknowledged).
+  if (cfg.outreach?.autoSend) {
+    const readiness = autoSendReady(cfg);
+    if (!readiness.ready) log(`outreach: autoSend on but not ready — missing: ${readiness.missing.join(", ")}`);
+    else {
+      const sent = await runOutreach(cfg, store);
+      if (sent) log(`outreach: ${sent} email(s) sent this cycle`);
+    }
+  }
 
   return store.summary();
 }

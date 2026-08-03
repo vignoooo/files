@@ -1,9 +1,10 @@
 {
   "region": "Sherbrooke, QC",
-  "categories": ["auto repair", "construction", "landscaping", "salon", "restaurant"],
+  "regions": "quebec",
+  "categories": "all",
   "prospector": "overpass",
   "builder": "claude",
-  "deployer": "none",
+  "deployer": "vercel",
   "includeOutdated": true,
   "parallel": 1,
   "maxPhotos": 6,
@@ -12,8 +13,11 @@
     "name": "Gabriel",
     "email": "info@vigno.ca",
     "company": "VIGNO",
-    "url": "vigno.ca"
+    "url": "vigno.ca",
+    "address": ""
   },
+  "outreach": { "autoSend": false, "dailyCap": 15, "windowHours": [9, 17] },
+  "caslAcknowledged": false,
   "designNotes": "VIGNO Essential package standard: one page, mobile-first, prominent booking CTA, contact form, map link. Custom design per business, never template energy.",
   "daemonIntervalSeconds": 3600
 }

@@ -15,10 +15,27 @@ export function loadEnv(root = process.cwd()) {
   }
 }
 
+// Rotation used when regions is set to "quebec" — one region per cycle,
+// round-robin, so the whole province gets covered without touching config.
+export const QUEBEC_REGIONS = [
+  "Montréal, QC", "Québec, QC", "Laval, QC", "Gatineau, QC", "Longueuil, QC",
+  "Sherbrooke, QC", "Lévis, QC", "Trois-Rivières, QC", "Terrebonne, QC",
+  "Saguenay, QC", "Brossard, QC", "Repentigny, QC", "Drummondville, QC",
+  "Saint-Jérôme, QC", "Granby, QC", "Blainville, QC", "Saint-Hyacinthe, QC",
+  "Shawinigan, QC", "Rimouski, QC", "Victoriaville, QC", "Joliette, QC",
+  "Salaberry-de-Valleyfield, QC", "Rouyn-Noranda, QC", "Sorel-Tracy, QC",
+  "Magog, QC", "Alma, QC", "Saint-Georges, QC", "Sept-Îles, QC"
+];
+
 const DEFAULTS = {
   // Where to hunt for businesses, e.g. "Sherbrooke, QC" or "Lisbon, Portugal"
   region: "",
-  // Business categories to target, in priority order
+  // Rotate through many regions, one per cycle: a list of region strings, or
+  // the shortcut "quebec" for the built-in province-wide list. Empty = use
+  // `region` only.
+  regions: [],
+  // Business categories to target, in priority order — or "all" for every
+  // category websmith knows how to find
   categories: ["restaurant", "barber", "bakery", "plumber", "florist", "auto repair"],
   // "google" (needs GOOGLE_MAPS_API_KEY) or "overpass" (free, OpenStreetMap)
   prospector: "overpass",
@@ -36,8 +53,14 @@ const DEFAULTS = {
   maxPhotos: 6,
   // Language for site copy and the pitch ("en", "fr", ...)
   language: "en",
-  // Operator identity, used to sign pitch drafts
-  operator: { name: "", email: "", company: "", url: "" },
+  // Operator identity, used to sign pitch drafts. `address` is the real
+  // mailing address CASL/CAN-SPAM require in commercial email; auto-send
+  // refuses to run without it.
+  operator: { name: "", email: "", company: "", url: "", address: "" },
+  // Automatic outreach — OFF by default. See README "Auto-send" before
+  // enabling; caslAcknowledged must also be set to true.
+  outreach: { autoSend: false, dailyCap: 15, windowHours: [9, 17] },
+  caslAcknowledged: false,
   // Extra styling/brand direction passed to the site builder
   designNotes: "",
   // Seconds between pipeline cycles in daemon mode
@@ -51,7 +74,13 @@ const DEFAULTS = {
 export function loadConfig(root = process.cwd()) {
   loadEnv(root);
   const file = readJson(resolve(root, "websmith.config.json"), {});
-  const cfg = { ...DEFAULTS, ...file, operator: { ...DEFAULTS.operator, ...(file.operator || {}) } };
+  const cfg = {
+    ...DEFAULTS,
+    ...file,
+    operator: { ...DEFAULTS.operator, ...(file.operator || {}) },
+    outreach: { ...DEFAULTS.outreach, ...(file.outreach || {}) }
+  };
+  if (cfg.regions === "quebec") cfg.regions = QUEBEC_REGIONS;
   cfg.root = root;
   cfg.dataDir = resolve(root, cfg.dataDir);
   cfg.sitesDir = resolve(root, cfg.sitesDir);

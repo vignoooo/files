@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { downloadGooglePhoto } from "./prospect/google.js";
 import { gatherWebPhotoUrls, downloadPhotos } from "./enrich/photos.js";
+import { discoverContact } from "./enrich/contact.js";
 import { writeJson, log } from "./util.js";
 
 // Prepares the per-lead workspace: sites/<slug>/ with brief.json and assets/.
@@ -62,7 +63,11 @@ export async function enrich(cfg, lead) {
     operatorPreferences: readMemory(cfg)
   };
   writeJson(join(siteDir, "brief.json"), brief);
-  return { siteDir, photos: photos.length };
+
+  // Published email discovery (website + public Facebook page) — the only
+  // kind of address auto-outreach is ever allowed to use.
+  const contact = await discoverContact(lead, socials);
+  return { siteDir, photos: photos.length, contact };
 }
 
 function readMemory(cfg) {
